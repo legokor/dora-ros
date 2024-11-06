@@ -1,0 +1,5 @@
+services:
+  ros2:
+    build: .
+    device_cgroup_rules:
+      - 'c 188:* rmw'
