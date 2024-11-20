@@ -43,7 +43,7 @@ WORKDIR /root/ros2_ws/src
 RUN git clone -b ros2 https://github.com/Slamtec/rplidar_ros.git
 
 WORKDIR /root/ros2_ws
-RUN colcon build --symlink-install
+RUN source /opt/ros/rolling/setup.bash && colcon build --symlink-install
 RUN echo 'source /root/ros2_ws/install/setup.bash' >> ~/.bashrc
 
 WORKDIR /root/ros2_ws
