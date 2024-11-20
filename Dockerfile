@@ -2,6 +2,8 @@
 
 FROM ubuntu:jammy
 
+SHELL ["/bin/bash", "-c"]
+
 RUN locale  # check for UTF-8
 
 RUN apt update
@@ -30,17 +32,18 @@ RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/r
 RUN apt update
 RUN apt install -y ros-dev-tools
 
-RUN apt update
-RUN apt upgrade
-
 RUN apt install -y ros-rolling-ros-base
 
 RUN echo 'source /opt/ros/rolling/setup.bash' >> ~/.bashrc
 
-RUN mkdir -p ~/ros2_ws/src
-WORKDIR ~/ros2_ws/src
+RUN apt install -y ros-rolling-rviz2 libogre-next-dev ros-rolling-rviz-ogre-vendor
+
+RUN mkdir -p /root/ros2_ws/src
+WORKDIR /root/ros2_ws/src
 RUN git clone -b ros2 https://github.com/Slamtec/rplidar_ros.git
 
-WORKDIR ~/ros2_ws
+WORKDIR /root/ros2_ws
 RUN colcon build --symlink-install
-RUN echo 'source /root/ros-workspace/rplidar_ros/install/setup.bash' >> ~/.bashrc
+RUN echo 'source /root/ros2_ws/install/setup.bash' >> ~/.bashrc
+
+WORKDIR /root/ros2_ws

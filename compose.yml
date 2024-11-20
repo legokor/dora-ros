@@ -1,5 +1,9 @@
+version: '3'
 services:
   ros2:
+    tty: true
     build: .
-    device_cgroup_rules:
-      - 'c 188:* rmw'
+#   device_cgroup_rules:
+#      - 'c 188:* rmw'
+    devices:
+       - "/dev/ttyUSB0:/dev/ttyUSB0"
