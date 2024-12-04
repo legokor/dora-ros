@@ -7,7 +7,7 @@ git clone git@github.com:legokor/dora-ros.git
 
 cd dora-ros
 
-docker-compose up
+docker-compose up -d
 ```
 
 ## Run
@@ -18,4 +18,10 @@ sudo chmod 777 /dev/ttyUSB0
 docker start doraros_ros2_1
 
 docker exec -it doraros_ros2_1 bash
+```
+
+## rviz
+
+```bash
+rviz2
 ```

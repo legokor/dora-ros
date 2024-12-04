@@ -9,13 +9,15 @@ RUN locale  # check for UTF-8
 RUN apt update
 RUN apt upgrade
 
-RUN apt install locales
+RUN apt install locales ranger neovim
 
 RUN locale-gen en_US en_US.UTF-8
 RUN update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 
 RUN locale  # verify settings
+
+RUN echo 'export EDITOR=nvim' >> /root/.bashrc
 
 RUN echo "Europe/Budapest" > /etc/timezone
 RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
@@ -34,9 +36,10 @@ RUN apt install -y ros-dev-tools
 
 RUN apt install -y ros-rolling-ros-base
 
-RUN echo 'source /opt/ros/rolling/setup.bash' >> ~/.bashrc
+RUN echo 'export ROS_DOMAIN_ID=0' >> /root/.bashrc
+RUN echo 'source /opt/ros/rolling/setup.bash' >> /root/.bashrc
 
-RUN apt install -y ros-rolling-rviz2 libogre-next-dev ros-rolling-rviz-ogre-vendor
+RUN apt install -y ros-rolling-rviz2 libogre-next-dev ros-rolling-rviz-ogre-vendor ros-rolling-qt-gui
 
 RUN mkdir -p /root/ros2_ws/src
 WORKDIR /root/ros2_ws/src
@@ -44,6 +47,8 @@ RUN git clone -b ros2 https://github.com/Slamtec/rplidar_ros.git
 
 WORKDIR /root/ros2_ws
 RUN source /opt/ros/rolling/setup.bash && colcon build --symlink-install
-RUN echo 'source /root/ros2_ws/install/setup.bash' >> ~/.bashrc
+RUN echo 'source /root/ros2_ws/install/setup.bash' >> /root/.bashrc
 
 WORKDIR /root/ros2_ws
+
+# ENTRYPOINT /root/entry.sh

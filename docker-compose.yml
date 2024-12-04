@@ -1,9 +1,21 @@
 version: '3'
+
+name: dora-ros
+
 services:
   ros2:
+    container_name: dora-ros
+
     tty: true
     build: .
-#   device_cgroup_rules:
-#      - 'c 188:* rmw'
+
+    network_mode: host
+
+    # device_cgroup_rules:
+    #   - 'c 188:* rmw'
+
     devices:
        - "/dev/ttyUSB0:/dev/ttyUSB0"
+
+    environment:
+      - DISPLAY
