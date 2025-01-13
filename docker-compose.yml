@@ -1,7 +1,4 @@
 version: '3'
-
-name: dora-ros
-
 services:
   ros2:
     container_name: dora-ros
