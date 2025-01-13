@@ -9,7 +9,7 @@ RUN locale  # check for UTF-8
 RUN apt update
 RUN apt upgrade
 
-RUN apt install locales ranger neovim
+RUN apt install -y locales ranger neovim
 
 RUN locale-gen en_US en_US.UTF-8
 RUN update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
