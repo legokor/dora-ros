@@ -1,27 +1,47 @@
 # Dora ROS
 
-## Set up
+## Running
+
+### Set up
 
 ```bash
 git clone git@github.com:legokor/dora-ros.git
 
 cd dora-ros
 
+sudo chmod 777 /dev/ttyUSB0
+
 docker-compose up -d
 ```
 
-## Run
+### Connect
 
 ```bash
-sudo chmod 777 /dev/ttyUSB0
+docker exec -it dora-ros bash
+```
 
-docker start doraros_ros2_1
+### Run Again
 
-docker exec -it doraros_ros2_1 bash
+```bash
+docker start dora-ros
+docker exec -it dora-ros bash
+```
+
+### Stop
+
+```bash
+docker stop dora-ros
 ```
 
 ## rviz
 
 ```bash
-rviz2
+rviz2 -d valami.rviz
+```
+
+## Stop motor
+
+```bash
+# in docker
+ros2 service call /stop_motor std_srvs/srv/Empty {}
 ```
