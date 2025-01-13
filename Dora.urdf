@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot name="dora" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="sam_bot" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <!-- Define robot constants -->
   <!-- nagyobb a modell a valosnal-->
@@ -9,8 +9,8 @@
 
   <xacro:property name="wheel_radius" value="0.03"/>
   <xacro:property name="wheel_width" value="0.02"/>
-  <xacro:property name="wheel_ygap" value="0"/>
-  <xacro:property name="wheel_zoff" value="0"/>
+  <xacro:property name="wheel_ygap" value=""/>
+  <xacro:property name="wheel_zoff" value=""/>
   <xacro:property name="wheel_xoff" value="0.12"/>
 
   <xacro:property name="caster_xoff" value="0.14"/>
@@ -20,7 +20,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <cylinder lenght="${base_length}" radius="{base_radius}"/>
+        <cylinder length="${base_length}" radius="{base_radius}"/>		
       </geometry>
 	
       <material name="Pink">
@@ -29,7 +29,7 @@
     </visual>
   </link>
 
-  <!-- Robot Footprint  Nav2 utkozésvizsgalathoz -->			
+  <!-- Robot Footprint Nav2 utkozésvizsgalathoz-->			
   <link name="base_footprint"/>
 
   <joint name="base_joint" type="fixed">
@@ -42,11 +42,10 @@
   <xacro:macro name="wheel" params="prefix x_reflect y_reflect yaw_rotate">
     <link name="${prefix}_link">
       <visual>
-        <origin xyz="0 0 0" rpy="${pi/2} 0 ${yaw_rotate}"/>
+        <origin xyz="0 0 0" rpy="${pi/2}"0 "${yaw_rotate}"/>
         <geometry>
-            <cylinder length="${base_width}" radius="${base_radius}"/>
+            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
         </geometry>
-
         <material name="Gray">
           <color rgba="0.5 0.5 0.5 1.0"/>
         </material>
