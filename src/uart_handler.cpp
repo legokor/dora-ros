@@ -1,7 +1,7 @@
-#include "uart_library/uart_handler.hpp"
+#include "controller/uart_handler.hpp"
 #include <cstring>
 
-UARTHandler::UARTHandler(const std::string &port, int baud_rate) {
+UARTHandler::UARTHandler(const std::string& port, int baud_rate) {
     serial_port = open(port.c_str(), O_RDWR | O_NOCTTY);
     if (serial_port == -1) {
         std::cerr << "Error opening UART port!" << std::endl;
@@ -29,17 +29,17 @@ void UARTHandler::sendSpeedCommand(float x, float y, float w) {
     float speeds[3] = { x, y, w };
     std::memcpy(payload.data(), speeds, sizeof(speeds));
 
-    sendFrame(0b00000001, 0x01, payload);  // Frame type: speed command
+    sendFrame(0b00000001, 0x01, payload); // Frame type: speed command
 }
 
-bool UARTHandler::receiveSpeedData(float &x, float &y, float &w) {
+bool UARTHandler::receiveSpeedData(float& x, float& y, float& w) {
     uint8_t frameType;
     std::vector<uint8_t> payload;
-    
+
     if (!receiveFrame(frameType, payload) || frameType != 0b10000010) {
         return false;
     }
-    
+
     if (payload.size() != sizeof(float) * 3) {
         return false; // Error: Incorrect payload size
     }
@@ -54,15 +54,15 @@ bool UARTHandler::receiveSpeedData(float &x, float &y, float &w) {
     return true;
 }
 
-void UARTHandler::sendFrame(uint8_t frameType, uint8_t seq, const std::vector<uint8_t> &payload) {
+void UARTHandler::sendFrame(uint8_t frameType, uint8_t seq, const std::vector<uint8_t>& payload) {
     std::vector<uint8_t> frame;
-    frame.push_back(0x42);  // SOF
+    frame.push_back(0x42); // SOF
     frame.push_back(frameType);
     frame.push_back(seq);
 
     for (uint8_t byte : payload) {
         if (byte == 0x42 || byte == 0x69 || byte == 0x7B) {
-            frame.push_back(0x7B);  
+            frame.push_back(0x7B);
             frame.push_back(byte == 0x42 ? 1 : byte == 0x69 ? 3 : 2);
         } else {
             frame.push_back(byte);
@@ -73,13 +73,14 @@ void UARTHandler::sendFrame(uint8_t frameType, uint8_t seq, const std::vector<ui
     for (size_t i = 1; i < frame.size(); i++) {
         checksum += frame[i];
     }
+
     frame.push_back(checksum);
-    frame.push_back(0x69);  // EOF
+    frame.push_back(0x69); // EOF
 
     write(serial_port, frame.data(), frame.size());
 }
 
-bool UARTHandler::receiveFrame(uint8_t &frameType, std::vector<uint8_t> &payload) {
+bool UARTHandler::receiveFrame(uint8_t& frameType, std::vector<uint8_t>& payload) {
     uint8_t buffer[256];
     int len;
     bool readingFrame = false;
@@ -133,5 +134,6 @@ bool UARTHandler::receiveFrame(uint8_t &frameType, std::vector<uint8_t> &payload
             }
         }
     }
+
     return false;
 }
