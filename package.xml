@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
     <name>controller</name>
+    <version>0.1.0</version>
 
     <depend>rclcpp</depend>
     <depend>geometry_msgs</depend>
