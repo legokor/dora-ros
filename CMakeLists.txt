@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.8)
-project(robot_controller)
+project(controller)
 
 # Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
+
+include_directories(include)
 
 # Create the executable
 add_executable(${CMAKE_PROJECT_NAME}

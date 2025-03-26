@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-    <name>robot_controller</name>
+    <name>controller</name>
 
     <depend>rclcpp</depend>
     <depend>geometry_msgs</depend>
