@@ -2,6 +2,7 @@
 <package format="2">
     <name>controller</name>
     <version>0.1.0</version>
+    <description>The main controller node for DORA</description>
 
     <depend>rclcpp</depend>
     <depend>geometry_msgs</depend>
