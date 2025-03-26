@@ -13,6 +13,8 @@ services:
 
     devices:
        - "/dev/ttyUSB0:/dev/ttyUSB0"
+       # TODO: usb port for nucleo
+      #  - "/dev/ttyUSB0:/dev/ttyTHS1"
 
     environment:
       - DISPLAY
