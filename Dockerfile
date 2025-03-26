@@ -49,6 +49,16 @@ WORKDIR /root/ros2_ws
 RUN source /opt/ros/rolling/setup.bash && colcon build --symlink-install
 RUN echo 'source /root/ros2_ws/install/setup.bash' >> /root/.bashrc
 
+WORKDIR /root/ros2_ws/src
+
+RUN mkdir -p /root/ros2_ws/src/robot_controller/src /root/ros2_ws/src/robot_controller/include/
+
+COPY ./CMakeLists.txt ./package.xml /root/ros2_ws/src/robot_controller
+
+COPY ./src/* /root/ros2_ws/src/robot_controller/src
+COPY ./include/* /root/ros2_ws/src/robot_controller/include/robot_controller
+COPY res/* /root/ros2_ws
+
 WORKDIR /root/ros2_ws
 
 # ENTRYPOINT /root/entry.sh

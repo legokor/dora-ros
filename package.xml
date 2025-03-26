@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>robot_controller</name>
+
+    <depend>rclcpp</depend>
+    <depend>geometry_msgs</depend>
+
+    <buildtool_depend>ament_cmake</buildtool_depend>
+    <exec_depend>ros2run</exec_depend>
+
+    <export>
+        <build_type>ament_cmake</build_type>
+    </export>
+</package>
