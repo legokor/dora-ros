@@ -45,12 +45,6 @@ RUN mkdir -p /root/ros2_ws/src
 WORKDIR /root/ros2_ws/src
 RUN git clone -b ros2 https://github.com/Slamtec/rplidar_ros.git
 
-WORKDIR /root/ros2_ws
-RUN source /opt/ros/rolling/setup.bash && colcon build --symlink-install
-RUN echo 'source /root/ros2_ws/install/setup.bash' >> /root/.bashrc
-
-WORKDIR /root/ros2_ws/src
-
 RUN mkdir -p /root/ros2_ws/src/controller/src /root/ros2_ws/src/controller/include/
 
 COPY ./CMakeLists.txt ./package.xml /root/ros2_ws/src/controller
@@ -60,5 +54,8 @@ COPY ./include/* /root/ros2_ws/src/controller/include/controller
 COPY res/* /root/ros2_ws
 
 WORKDIR /root/ros2_ws
+
+RUN echo 'source /root/ros2_ws/install/setup.bash' >> /root/.bashrc
+RUN source /opt/ros/rolling/setup.bash && colcon build
 
 # ENTRYPOINT /root/entry.sh
