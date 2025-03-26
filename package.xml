@@ -3,6 +3,8 @@
     <name>controller</name>
     <version>0.1.0</version>
     <description>The main controller node for DORA</description>
+    <maintainer email="yo.mama@lego.com">John Lego</maintainer>
+    <license>Apache-2.0</license>
 
     <depend>rclcpp</depend>
     <depend>geometry_msgs</depend>
