@@ -12,7 +12,7 @@ public:
     UARTHandlerNode() : Node("uart_handler_node"), uart("/dev/ttyTHS1", B115200) {
         // UART port and baudrate TODO: check!
         // Publisher for received speed data
-        twist_publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("current_velocity");
+        twist_publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("current_velocity", 10);
 
         // Subscriber for sending speed commands
         twist_subscriber_ = this->create_subscription<geometry_msgs::msg::Twist>(
