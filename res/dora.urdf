@@ -1,69 +1,75 @@
 <?xml version="1.0"?>
-<robot name="dora">
+<robot name="dora" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:property name="body_height" value="0.5" />
+    <xacro:property name="body_scale" value="0.005" />
+
+    <xacro:property name="body_pos" value="0 0 ${body_height * body_scale}" />
+    <xacro:property name="body_scale_xyz" value="${body_scale} ${body_scale} ${body_scale}" />
 
     <!-- Base Link -->
     <link name="base_link">
         <inertial>
             <mass value="5.0" />
-            <origin xyz="0 0 0" />
-            <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0.0" ixz="0.0" iyz="0.0" />
+            <origin xyz="0 0 1" />
+            <inertia ixx="1" iyy="1" izz="1" ixy="1" ixz="1" iyz="1" />
         </inertial>
+
         <visual>
+            <origin xyz="${body_pos}" />
+
             <geometry>
-                <mesh filename="dora_vaz.stl" />
+                <!-- <mesh filename="dora_vaz.stl" /> -->
+                <mesh filename="package://dora_urdf_rviz2/meshes/dora_vaz.stl"
+                    scale="${body_scale_xyz}" />
             </geometry>
+
+            <material name="wood">
+                <color rgba="0.96 0.73 0.53 1" />
+            </material>
         </visual>
+
         <collision>
+            <origin xyz="${body_pos}" />
+
             <geometry>
-                <mesh filename="dora_vaz.stl" />
+                <!-- <mesh filename="dora_vaz.stl" /> -->
+                <mesh filename="package://dora_urdf_rviz2/meshes/dora_vaz.stl"
+                    scale="${body_scale_xyz}" />
             </geometry>
         </collision>
     </link>
 
-    <!-- Omni Wheels -->
-    <joint name="wheel_1_joint" type="continuous">
-        <parent link="base_link" />
-        <child link="wheel_1" />
-        <origin xyz="0.5 -0.288 0" rpy="0 0 0" />
-        <axis xyz="0 0 1" />
-    </joint>
+    <xacro:macro name="omniwheel" params="idx">
+        <xacro:property name="angle" value='${0.5 * pi + 2 * pi * idx / 3}' />
 
-    <link name="wheel_1">
-        <visual>
-            <geometry>
-                <cylinder radius="0.05" length="0.02" />
-            </geometry>
-        </visual>
-    </link>
+        <joint name="wheel_joint_${idx}" type="continuous">
+            <parent link="base_link" />
+            <child link="wheel_${idx}" />
+            <origin xyz="${cos(angle)} ${sin(angle)} ${-body_height * 0.25}" rpy="0 0 0" />
+            <axis xyz="${cos(angle)} ${sin(angle)} 0" />
+        </joint>
 
-    <joint name="wheel_2_joint" type="continuous">
-        <parent link="base_link" />
-        <child link="wheel_2" />
-        <origin xyz="-0.5 -0.288 0" rpy="0 0 0" />
-        <axis xyz="0 0 1" />
-    </joint>
+        <link name="wheel_${idx}">
+            <collision>
+                <origin rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
 
-    <link name="wheel_2">
-        <visual>
-            <geometry>
-                <cylinder radius="0.05" length="0.02" />
-            </geometry>
-        </visual>
-    </link>
+                <geometry>
+                    <cylinder radius="0.1" length="0.02" />
+                </geometry>
+            </collision>
 
-    <joint name="wheel_3_joint" type="continuous">
-        <parent link="base_link" />
-        <child link="wheel_3" />
-        <origin xyz="0 0.577 0" rpy="0 0 0" />
-        <axis xyz="0 0 1" />
-    </joint>
+            <visual>
+                <origin rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
 
-    <link name="wheel_3">
-        <visual>
-            <geometry>
-                <cylinder radius="0.05" length="0.02" />
-            </geometry>
-        </visual>
-    </link>
+                <geometry>
+                    <cylinder radius="0.1" length="0.02" />
+                </geometry>
+            </visual>
+        </link>
+    </xacro:macro>
 
+    <xacro:omniwheel idx="0" />
+    <xacro:omniwheel idx="1" />
+    <xacro:omniwheel idx="2" />
 </robot>
