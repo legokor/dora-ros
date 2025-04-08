@@ -10,12 +10,12 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="DORA_robot.stl" />
+                <mesh filename="dora_vaz.stl" />
             </geometry>
         </visual>
         <collision>
             <geometry>
-                <mesh filename="DORA_robot.stl" />
+                <mesh filename="dora_vaz.stl" />
             </geometry>
         </collision>
     </link>
