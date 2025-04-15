@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - '**'
+    paths:
+      - .github/workflows/build-ros-container.yml
+      - Dockerfile
+      - include
+      - res
+      - src
+      - CMakeLists.txt
+      - package.xml
 
 jobs:
   build:
@@ -36,3 +44,5 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}:latest
           platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
