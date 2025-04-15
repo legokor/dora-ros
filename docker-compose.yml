@@ -2,9 +2,9 @@ version: '3'
 services:
   ros2:
     container_name: dora-ros
+    image: ghcr.io/legokor/dora-ros:latest
 
     tty: true
-    build: .
 
     network_mode: host
 
