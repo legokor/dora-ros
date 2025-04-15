@@ -33,7 +33,7 @@ RUN apt install -y ros-rolling-ros-base
 # RUN echo 'export ROS_DOMAIN_ID=0' >> /root/.bashrc
 RUN echo 'source /opt/ros/rolling/setup.bash' >> /root/.bashrc
 
-# RUN apt install -y ros-rolling-rviz2 libogre-next-dev ros-rolling-rviz-ogre-vendor ros-rolling-qt-gui
+RUN apt install -y ros-rolling-rviz2 libogre-next-dev ros-rolling-rviz-ogre-vendor ros-rolling-qt-gui
 
 # RPLIDAR
 RUN mkdir -p /root/ros2_ws/src
