@@ -1,8 +1,6 @@
 # Dora ROS
 
-## Running
-
-### Set up
+## Setting up
 
 ```bash
 git clone git@github.com:legokor/dora-ros.git
@@ -33,15 +31,21 @@ docker exec -it dora-ros bash
 docker stop dora-ros
 ```
 
-## rviz
+## ROS commands
+
+### Start lidar node
+```bash
+ros2 launch rplidar_ros rplidar_a1_launch.py
+```
+
+### Stop lidar motor
+
+```bash
+ros2 service call /stop_motor std_srvs/srv/Empty {}
+```
+
+## rviz on another machine
 
 ```bash
 rviz2 -d valami.rviz
-```
-
-## Stop motor
-
-```bash
-# in docker
-ros2 service call /stop_motor std_srvs/srv/Empty {}
 ```
