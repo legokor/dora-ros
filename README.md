@@ -46,6 +46,12 @@ ros2 service call /stop_motor std_srvs/srv/Empty {}
 
 ## rviz on another machine
 
+If you're running rviz in a Docker container you need to give it access to your X server:
 ```bash
-rviz2 -d valami.rviz
+xhost +local:
+```
+
+```bash
+# TODO: create dora.rviz
+rviz2 -d dora.rviz
 ```
