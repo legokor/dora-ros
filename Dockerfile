@@ -4,8 +4,6 @@ FROM ubuntu:jammy
 
 SHELL ["/bin/bash", "-c"]
 
-RUN locale  # check for UTF-8
-
 RUN apt update -y
 RUN apt upgrade -y
 
@@ -14,9 +12,6 @@ RUN apt install -y locales ranger neovim curl
 RUN locale-gen en_US en_US.UTF-8
 RUN update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 ENV LANG=en_US.UTF-8
-
-# verify settings
-RUN locale
 
 RUN echo 'export EDITOR=nvim' >> /root/.bashrc
 
