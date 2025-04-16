@@ -40,12 +40,8 @@ RUN mkdir -p /root/ros2_ws/src
 WORKDIR /root/ros2_ws/src
 RUN git clone -b ros2 https://github.com/Slamtec/rplidar_ros.git
 
-# our ros node
-RUN mkdir -p /root/ros2_ws/src/controller/src /root/ros2_ws/src/controller/include/
-COPY ./CMakeLists.txt ./package.xml /root/ros2_ws/src/controller/
-COPY ./src/* /root/ros2_ws/src/controller/src/
-COPY ./include/* /root/ros2_ws/src/controller/include/controller/
-COPY res/* /root/ros2_ws/
+# ros copy workspace
+COPY ./ros2_ws/* /root/ros2_ws/
 
 WORKDIR /root/ros2_ws/
 
