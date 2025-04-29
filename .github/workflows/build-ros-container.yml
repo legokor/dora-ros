@@ -7,11 +7,7 @@ on:
     paths:
       - .github/workflows/build-ros-container.yml
       - Dockerfile
-      - include
-      - res
-      - src
-      - CMakeLists.txt
-      - package.xml
+      - ros2_ws/
 
 jobs:
   build:

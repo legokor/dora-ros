@@ -51,7 +51,7 @@ If you're running rviz in a Docker container you need to give it access to your 
 xhost +local:
 ```
 
+Running like this gives the container access to your X11 session and starts `rviz`:
 ```bash
-# TODO: create dora.rviz
-rviz2 -d dora.rviz
+docker run -it --rm --volume /tmp/.X11-unix:/tmp/.X11-unix --env DISPLAY ghcr.io/legokor/dora-ros:latest bash -ic rviz2
 ```
