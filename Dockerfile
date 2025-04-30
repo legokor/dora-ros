@@ -1,62 +1,45 @@
 # dora Docker
 
-FROM ubuntu:jammy
+FROM ros:jazzy
 
-SHELL ["/bin/bash", "-c"]
+## update and install packages
+RUN apt-get update && \
+    apt-get upgrade -y && \
+\
+    apt-get install -y \
+        ranger neovim curl btop tree \
+\
+        ros-dev-tools \
+        ros-${ROS_DISTRO}-xacro \
+        ros-${ROS_DISTRO}-rviz2 \
+        ros-${ROS_DISTRO}-joint-state-publisher-gui \
+        ros-${ROS_DISTRO}-rplidar-ros \
+\
+    # clean up filesystem \
+    && rm -rf /var/lib/apt/lists/*
 
-## BASIC SETUP
+# make our lives easier
+RUN echo \
+    "export EDITOR=nvim\n" \
+    "alias py=python3\n" \
+    "alias c=clear" \
+        >> /root/.bashrc
 
-RUN apt update -y && apt upgrade -y
-
-RUN apt install -y locales ranger neovim curl btop tree python3
-
-RUN locale-gen en_US en_US.UTF-8
-RUN update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
-ENV LANG=en_US.UTF-8
-
-RUN echo 'export EDITOR=nvim' >> /root/.bashrc
-RUN echo 'alias py=python3' >> /root/.bashrc
-RUN echo 'alias c=clear' >> /root/.bashrc
-
+# timezones
 RUN echo "Europe/Budapest" > /etc/timezone
 RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
-
-## INSTALL ROS2
-RUN apt install -y software-properties-common
-RUN add-apt-repository universe
-
-RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
-
-RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
-
-RUN apt update -y && apt install -y ros-dev-tools ros-rolling-ros-base
-
-# RUN echo 'export ROS_DOMAIN_ID=0' >> /root/.bashrc
-RUN echo 'source /opt/ros/rolling/setup.bash' >> /root/.bashrc
-
-## INSTALL ROS2 packages
-
-RUN apt install -y ros-rolling-xacro
-
-# rviz
-RUN apt install -y ros-rolling-rviz2 libogre-next-dev ros-rolling-rviz-ogre-vendor ros-rolling-qt-gui
-
-# state publishers
-RUN apt install -y ros-rolling-robot-state-publisher \
-                   ros-rolling-joint-state-publisher-gui
-
-## RPLIDAR
-RUN mkdir -p /root/ros2_ws/src
-WORKDIR /root/ros2_ws/src
-RUN git clone -b ros2 https://github.com/Slamtec/rplidar_ros.git
-
+        
 # ros copy workspace
 COPY ./ros2_ws/* /root/ros2_ws/
 
-WORKDIR /root/ros2_ws/
-
+# setup ros environment in shell
+SHELL ["/bin/bash", "-c"]
 RUN echo 'source /root/ros2_ws/install/setup.bash' >> /root/.bashrc
-RUN source /opt/ros/rolling/setup.bash && colcon build
+
+# build our packages
+WORKDIR /root/ros2_ws/
+RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
+    colcon build
 
 # ENTRYPOINT /root/entry.sh
 CMD ["ros2", "launch", "controller", "launch/launch_dora.xml"]
