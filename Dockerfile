@@ -21,9 +21,9 @@ RUN apt-get update && \
 
 # make our lives easier
 RUN echo \
-    "export EDITOR=nvim\n" \
-    "alias py=python3\n" \
-    "alias c=clear" \
+    $'export EDITOR=nvim\n' \
+    $'alias py=python3\n' \
+    $'alias c=clear\n' \
         >> /root/.bashrc
 
 # timezones
