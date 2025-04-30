@@ -2,30 +2,43 @@
 
 ## Setting up
 
+Clone repo to get compose file:
 ```bash
 git clone git@github.com:legokor/dora-ros.git
-
 cd dora-ros
-
-sudo chmod 777 /dev/ttyUSB0
-
-docker-compose up -d
 ```
 
-### Connect
+Or just download it:
+```bash
+wget https://github.com/legokor/dora-ros/raw/refs/heads/master/docker-compose.yml
+```
+
+<!-- TODO: use compose to set LiDar permissions -->
+Permission to access the LiDar:
+```bash
+sudo chmod 777 /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0
+```
+
+### Start container
+
+```bash
+docker-compose up -d
+```
+By default this starts everything.
+
+### Connect to container
 
 ```bash
 docker exec -it dora-ros bash
 ```
 
-### Run Again
+### Restart container
 
 ```bash
 docker start dora-ros
-docker exec -it dora-ros bash
 ```
 
-### Stop
+### Stop container
 
 ```bash
 docker stop dora-ros
@@ -33,18 +46,13 @@ docker stop dora-ros
 
 ## ROS commands
 
-### Start lidar node
-```bash
-ros2 launch rplidar_ros rplidar_a1_launch.py
-```
-
 ### Stop lidar motor
 
 ```bash
 ros2 service call /stop_motor std_srvs/srv/Empty {}
 ```
 
-## rviz on another machine
+## Run rviz on another machine
 
 If you're running rviz in a Docker container you need to give it access to your X server:
 ```bash
@@ -53,5 +61,5 @@ xhost +local:
 
 Running like this gives the container access to your X11 session and starts `rviz`:
 ```bash
-docker run -it --rm --volume /tmp/.X11-unix:/tmp/.X11-unix --env DISPLAY ghcr.io/legokor/dora-ros:latest bash -ic rviz2
+docker run -it --rm --volume /tmp/.X11-unix:/tmp/.X11-unix --env DISPLAY ghcr.io/legokor/dora-rviz:latest
 ```
