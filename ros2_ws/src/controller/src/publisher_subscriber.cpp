@@ -9,7 +9,7 @@
 class UARTHandlerNode : public rclcpp::Node {
 public:
     // TODO: usb port
-    UARTHandlerNode() : Node("uart_handler_node"), uart("/dev/ttyTHS1", B115200) {
+    UARTHandlerNode() : Node("uart_handler_node"), uart("/dev/ttyUSB0", B115200) {
         // UART port and baudrate TODO: check!
         // Publisher for received speed data
         twist_publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("current_velocity", 10);
@@ -42,7 +42,8 @@ private:
         std::lock_guard<std::mutex> lock(uart_mutex);
 
         float x, y, w;
-        if (uart.receiveSpeedData(x, y, w)) {
+        bool recvd = uart.receiveSpeedData(x, y, w);
+        if (recvd) {
             auto twist_msg = geometry_msgs::msg::Twist();
             twist_msg.linear.x = x;
             twist_msg.linear.y = y;
@@ -53,7 +54,9 @@ private:
         auto end = std::chrono::steady_clock::now(); // End timing
         std::chrono::milliseconds duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-        RCLCPP_INFO(this->get_logger(), "UART read took %ld ms", duration.count());
+        if (recvd) {
+            RCLCPP_INFO(this->get_logger(), "UART read took %ld ms, got: x:%f y:%f w:%f", duration.count(), x, y, w);
+        }
     }
 };
 
