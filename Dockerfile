@@ -29,7 +29,7 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o 
 
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
-RUN apt install -y ros-dev-tools ros-rolling-ros-base
+RUN apt update -y && apt install -y ros-dev-tools ros-rolling-ros-base
 
 # RUN echo 'export ROS_DOMAIN_ID=0' >> /root/.bashrc
 RUN echo 'source /opt/ros/rolling/setup.bash' >> /root/.bashrc
@@ -59,3 +59,4 @@ RUN echo 'source /root/ros2_ws/install/setup.bash' >> /root/.bashrc
 RUN source /opt/ros/rolling/setup.bash && colcon build
 
 # ENTRYPOINT /root/entry.sh
+CMD ["ros2", "launch", "controller", "launch/launch_dora.xml"]
