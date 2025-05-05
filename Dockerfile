@@ -42,5 +42,5 @@ RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
     colcon build
 
 CMD cd /root/ros2_ws/ && \
-    source /opt/ros/${ROS_DISTRO}/setup.bash && \
+    source /root/ros2_ws/install/setup.bash && \
     ros2 launch controller launch/launch_dora.xml
