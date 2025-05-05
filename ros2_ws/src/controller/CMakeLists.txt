@@ -26,7 +26,7 @@ install(TARGETS ${CMAKE_PROJECT_NAME}
 
 install(DIRECTORY
   launch
-  DESTINATION share/${PROJECT_NAME}/
+  DESTINATION share/${CMAKE_PROJECT_NAME}/
 )
 
 # Ament package
