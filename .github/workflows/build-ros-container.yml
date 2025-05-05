@@ -7,7 +7,7 @@ on:
     paths:
       - .github/workflows/build-ros-container.yml
       - Dockerfile
-      - ros2_ws/
+      - ros2_ws/**/*
 
 jobs:
   build:
