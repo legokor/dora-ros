@@ -8,7 +8,6 @@
 
 class UARTHandlerNode : public rclcpp::Node {
 public:
-    // TODO: usb port
     UARTHandlerNode() : Node("uart_handler_node"), uart("/dev/ttyUSB0", B115200) {
         // UART port and baudrate TODO: check!
         // Publisher for received speed data
