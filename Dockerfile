@@ -14,7 +14,8 @@ RUN apt-get update && \
         ros-dev-tools \
         ros-${ROS_DISTRO}-xacro \
         ros-${ROS_DISTRO}-joint-state-publisher \
-        ros-${ROS_DISTRO}-rplidar-ros \
+        # rplidar package is not maintained :/ \
+        # ros-${ROS_DISTRO}-rplidar-ros \
 \
     # clean up filesystem \
     && rm -rf /var/lib/apt/lists/*
@@ -34,13 +35,19 @@ RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
 COPY ./ros2_ws/* /root/ros2_ws/
 
 # setup ros environment in shell
-RUN echo 'source /root/ros2_ws/install/setup.bash' >> /root/.bashrc
+RUN echo 'source /root/ros2_ws/src/install/setup.bash' >> /root/.bashrc
+
+WORKDIR /root/ros2_ws/
+
+# RPLIDAR
+RUN mkdir -p /root/ros2_ws/src
+WORKDIR /root/ros2_ws/src
+RUN git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git
 
 # build our packages
-WORKDIR /root/ros2_ws/
 RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
     colcon build
 
 CMD cd /root/ros2_ws/ && \
-    source /root/ros2_ws/install/setup.bash && \
-    ros2 launch controller launch/launch_dora.xml
+    source /root/ros2_ws/src/install/setup.bash && \
+    ros2 launch controller launch_dora.xml
