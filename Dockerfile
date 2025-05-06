@@ -42,7 +42,8 @@ RUN cd /root/ros2_ws/src/ && \
     git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git
 
 # build our packages
-RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
+RUN cd /root/ros2_ws/src/ && \
+    source /opt/ros/${ROS_DISTRO}/setup.bash && \
     colcon build
 
 CMD cd /root/ros2_ws/ && \
