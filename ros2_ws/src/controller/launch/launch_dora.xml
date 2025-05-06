@@ -2,22 +2,23 @@
 <launch>
   <arg name="urdf_file" default="/root/ros2_ws/dora.urdf" />
 
-    <node pkg="rplidar_ros" exec="rplidar_node" name="lidar" namespace="dora" />
+  <!-- <node pkg="rplidar_ros" exec="rplidar_node" name="lidar" namespace="dora" /> -->
+  <include file="$(find-pkg-share rplidar_ros)/launch/rplidar_a1_launch.py" />
 
-    <node pkg="joint_state_publisher" exec='joint_state_publisher'
-          name='joint_state_publisher' namespace="dora">
+  <node pkg="joint_state_publisher" exec='joint_state_publisher'
+    name='joint_state_publisher' namespace="dora">
 
-        <param name="output" value="screen" />
-        <param name="robot_description" value="$(command 'xacro $(var urdf_file)' ignore)" />
-    </node>
+    <param name="output" value="screen" />
+    <param name="robot_description" value="$(command 'xacro $(var urdf_file)' ignore)" />
+  </node>
 
-    <node pkg="robot_state_publisher" exec='robot_state_publisher'
-          name='robot_state_publisher' namespace="dora">
+  <node pkg="robot_state_publisher" exec='robot_state_publisher'
+    name='robot_state_publisher' namespace="dora">
 
-        <param name="output" value="screen" />
-        <param name="robot_description" value="$(command 'xacro $(var urdf_file)' ignore)" />
-        <param name="tf_prefix" value="dora" />
-    </node>
+    <param name="output" value="screen" />
+    <param name="robot_description" value="$(command 'xacro $(var urdf_file)' ignore)" />
+    <param name="tf_prefix" value="dora" />
+  </node>
 
-    <node pkg="controller" exec="controller" name="controller" namespace="dora" />
+  <node pkg="controller" exec="controller" name="controller" namespace="dora" />
 </launch>
