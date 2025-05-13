@@ -61,5 +61,5 @@ xhost +local:
 
 Running like this gives the container access to your X11 session and starts `rviz`:
 ```bash
-docker run --rm -itv /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY ghcr.io/legokor/dora-ros-rviz:latest
+docker run --rm -itv /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY --network host ghcr.io/legokor/dora-ros-rviz:latest
 ```
