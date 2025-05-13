@@ -31,15 +31,17 @@ RUN echo \
 RUN echo "Europe/Budapest" > /etc/timezone
 RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
 
-# ros copy workspace
-COPY ./ros2_ws/ /root/ros2_ws/
-
 # setup ros environment in shell
 RUN echo 'source /root/ros2_ws/src/install/setup.bash' >> /root/.bashrc
+
+RUN mkdir -p /root/ros2_ws/src/
 
 # RPLIDAR
 RUN cd /root/ros2_ws/src/ && \
     git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git
+
+# ros copy workspace
+COPY ./ros2_ws/ /root/ros2_ws/
 
 # build our packages
 RUN cd /root/ros2_ws/src/ && \

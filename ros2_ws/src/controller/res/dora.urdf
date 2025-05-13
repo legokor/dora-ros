@@ -13,9 +13,7 @@
             <origin xyz="${body_pos}" />
 
             <geometry>
-                <!-- <mesh filename="dora_vaz.stl" /> -->
-                <mesh filename="package://dora_urdf_rviz2/meshes/dora_vaz.stl"
-                    scale="${body_scale_xyz}" />
+                <mesh filename="package://controller/res/dora_vaz.stl" scale="${body_scale_xyz}" />
             </geometry>
 
             <material name="wood">
@@ -27,9 +25,7 @@
             <origin xyz="${body_pos}" />
 
             <geometry>
-                <!-- <mesh filename="dora_vaz.stl" /> -->
-                <mesh filename="package://dora_urdf_rviz2/meshes/dora_vaz.stl"
-                    scale="${body_scale_xyz}" />
+                <mesh filename="package://controller/res/dora_vaz.stl" scale="${body_scale_xyz}" />
             </geometry>
         </collision>
     </link>

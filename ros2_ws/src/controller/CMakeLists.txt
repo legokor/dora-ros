@@ -29,5 +29,10 @@ install(DIRECTORY
   DESTINATION share/${CMAKE_PROJECT_NAME}/
 )
 
+install(DIRECTORY
+  res
+  DESTINATION share/${CMAKE_PROJECT_NAME}/
+)
+
 # Ament package
 ament_package()
