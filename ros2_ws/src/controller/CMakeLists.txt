@@ -25,12 +25,7 @@ install(TARGETS ${CMAKE_PROJECT_NAME}
   DESTINATION lib/${CMAKE_PROJECT_NAME})
 
 install(DIRECTORY
-  launch
-  DESTINATION share/${CMAKE_PROJECT_NAME}/
-)
-
-install(DIRECTORY
-  res
+  launch res
   DESTINATION share/${CMAKE_PROJECT_NAME}/
 )
 
