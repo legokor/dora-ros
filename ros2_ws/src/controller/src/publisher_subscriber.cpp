@@ -4,11 +4,10 @@
 #include "rclcpp/rclcpp.hpp"
 // #include <vector>
 #include <chrono>
-#include <memory>
 
 class UARTHandlerNode : public rclcpp::Node {
 public:
-    UARTHandlerNode() : Node("uart_handler_node"), uart("/dev/ttyUSB0", B115200) {
+    UARTHandlerNode() : Node("uart_handler_node"), uart("/dev/ttyUSB1", B115200) {
         // UART port and baudrate TODO: check!
         // Publisher for received speed data
         twist_publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("current_velocity", 10);
