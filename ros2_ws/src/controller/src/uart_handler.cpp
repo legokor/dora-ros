@@ -54,16 +54,20 @@ bool UARTHandler::receiveSpeedData(float& x, float& y, float& w) {
     return true;
 }
 
+#define UART_SOF 42
+#define UART_ESC 123
+#define UART_EOF 42
+
 void UARTHandler::sendFrame(uint8_t frameType, uint8_t seq, const std::vector<uint8_t>& payload) {
     std::vector<uint8_t> frame;
-    frame.push_back(0x42); // SOF
+    frame.push_back(UART_SOF); // SOF
     frame.push_back(frameType);
     frame.push_back(seq);
 
     for (uint8_t byte : payload) {
-        if (byte == 0x42 || byte == 0x69 || byte == 0x7B) {
-            frame.push_back(0x7B);
-            frame.push_back(byte == 0x42 ? 1 : byte == 0x69 ? 3 : 2);
+        if (byte == UART_SOF || byte == UART_EOF || byte == UART_ESC) {
+            frame.push_back(UART_ESC);
+            frame.push_back(byte == UART_SOF ? 1 : (byte == UART_EOF ? 3 : 2));
         } else {
             frame.push_back(byte);
         }
@@ -75,7 +79,7 @@ void UARTHandler::sendFrame(uint8_t frameType, uint8_t seq, const std::vector<ui
     }
 
     frame.push_back(checksum);
-    frame.push_back(0x69); // EOF
+    frame.push_back(UART_EOF); // EOF
 
     write(serial_port, frame.data(), frame.size());
 }
@@ -92,17 +96,17 @@ bool UARTHandler::receiveFrame(uint8_t& frameType, std::vector<uint8_t>& payload
         for (int i = 0; i < len; i++) {
             uint8_t byte = buffer[i];
 
-            if (byte == 0x7B) {
+            if (byte == UART_ESC) {
                 escapeNext = true;
                 continue;
             }
 
             if (escapeNext) {
-                byte = (byte == 1) ? 0x42 : (byte == 2) ? 0x7B : (byte == 3) ? 0x69 : byte;
+                byte = (byte == 1) ? UART_SOF : (byte == 2) ? UART_ESC : (byte == 3) ? UART_EOF : byte;
                 escapeNext = false;
             }
 
-            if (byte == 0x42) {
+            if (byte == UART_SOF) {
                 payload.clear();
                 readingFrame = true;
                 checksum = 0;
@@ -116,7 +120,7 @@ bool UARTHandler::receiveFrame(uint8_t& frameType, std::vector<uint8_t>& payload
                 }
             }
 
-            if (byte == 0x69 && readingFrame) {
+            if (byte == UART_EOF && readingFrame) {
                 if (payload.size() < 2) {
                     readingFrame = false;
                     continue;
