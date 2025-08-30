@@ -5,23 +5,44 @@
 #define UART_ESC 123
 #define UART_EOF 69
 
+void configure_serial_port(int fd, int speed) {
+    struct termios tty;
+
+    if (tcgetattr(fd, &tty) != 0) {
+        perror("tcgetattr");
+        exit(1);
+    }
+
+    cfsetospeed(&tty, speed);
+    cfsetispeed(&tty, speed);
+
+    tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;     // 8-bit chars
+    tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | INLCR | IGNCR | ICRNL);                         // disable break processing
+    tty.c_lflag = 0;                                // no signaling chars, no echo
+    tty.c_oflag = 0;                                // no remapping, no delays
+    tty.c_cc[VMIN]  = 1;                            // read doesn't return until at least 1 byte is received
+    tty.c_cc[VTIME] = 1;                            // 0.1 seconds read timeout
+
+    tty.c_iflag &= ~(IXON | IXOFF | IXANY);         // shut off xon/xoff ctrl
+    tty.c_cflag |= (CLOCAL | CREAD);                // ignore modem controls, enable reading
+    tty.c_cflag &= ~(PARENB | PARODD);              // no parity
+    tty.c_cflag &= ~CSTOPB;                         // 1 stop bit
+    tty.c_cflag &= ~CRTSCTS;                        // no hardware flow control
+
+    if (tcsetattr(fd, TCSANOW, &tty) != 0) {
+        perror("tcsetattr");
+        exit(1);
+    }
+}
+
 UARTHandler::UARTHandler(const std::string& port, int baud_rate) {
-    serial_port = open(port.c_str(), O_RDWR | O_NOCTTY);
+    serial_port = open(port.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
     if (serial_port == -1) {
         std::cerr << "Error opening UART port!" << std::endl;
         exit(1);
     }
 
-    struct termios options;
-    tcgetattr(serial_port, &options);
-    cfsetispeed(&options, baud_rate);
-    cfsetospeed(&options, baud_rate);
-    options.c_cflag |= CS8 | CLOCAL | CREAD;
-    options.c_iflag = IGNPAR;
-    options.c_oflag = 0;
-    options.c_lflag = 0;
-    tcflush(serial_port, TCIFLUSH);
-    tcsetattr(serial_port, TCSANOW, &options);
+    configure_serial_port(serial_port, baud_rate);
 }
 
 UARTHandler::~UARTHandler() {
