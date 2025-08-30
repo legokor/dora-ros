@@ -1,6 +1,10 @@
 #include "controller/uart_handler.hpp"
 #include <cstring>
 
+#define UART_SOF 42
+#define UART_ESC 123
+#define UART_EOF 69
+
 UARTHandler::UARTHandler(const std::string& port, int baud_rate) {
     serial_port = open(port.c_str(), O_RDWR | O_NOCTTY);
     if (serial_port == -1) {
@@ -53,10 +57,6 @@ bool UARTHandler::receiveSpeedData(float& x, float& y, float& w) {
 
     return true;
 }
-
-#define UART_SOF 42
-#define UART_ESC 123
-#define UART_EOF 42
 
 void UARTHandler::sendFrame(uint8_t frameType, uint8_t seq, const std::vector<uint8_t>& payload) {
     std::vector<uint8_t> frame;
