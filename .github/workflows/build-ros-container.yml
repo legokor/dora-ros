@@ -8,6 +8,7 @@ on:
       - .github/workflows/build-ros-container.yml
       - Dockerfile
       - ros2_ws/**/*
+      - scripts/*
 
 jobs:
   build:

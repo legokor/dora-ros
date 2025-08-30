@@ -32,22 +32,14 @@ RUN echo "Europe/Budapest" > /etc/timezone
 RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
 
 # setup ros environment in shell
-RUN echo 'source /root/ros2_ws/src/install/setup.bash' >> /root/.bashrc
-
-RUN mkdir -p /root/ros2_ws/src/
-
-# RPLIDAR
-RUN cd /root/ros2_ws/src/ && \
-    git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git
+RUN echo 'source /root/dora-ros/ros2_ws/src/install/setup.bash' >> /root/.bashrc
 
 # ros copy workspace
-COPY ./ros2_ws/ /root/ros2_ws/
+RUN cd /root/ && git clone https://github.com/legokor/dora-ros.git
 
-# build our packages
-RUN cd /root/ros2_ws/src/ && \
-    source /opt/ros/${ROS_DISTRO}/setup.bash && \
-    colcon build
+# RPLIDAR
+RUN cd /root/dora-ros/ros2_ws/src/ && \
+    git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git
 
-CMD cd /root/ros2_ws/ && \
-    source /root/ros2_ws/src/install/setup.bash && \
-    ros2 launch controller launch_dora.xml
+RUN source /root/dora-ros/run.sh
+
