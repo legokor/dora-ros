@@ -41,5 +41,5 @@ RUN cd /root/ && git clone https://github.com/legokor/dora-ros.git
 RUN cd /root/dora-ros/ros2_ws/src/ && \
     git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git
 
-RUN source /root/dora-ros/scripts/run.sh
+RUN source /root/dora-ros/scripts/build.sh
 
