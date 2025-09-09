@@ -10,6 +10,7 @@ RUN apt-get update && \
 \
     apt-get install -y \
         ranger neovim curl btop tree \
+        bash-comletion python3-serial unzip \
 \
         ros-dev-tools \
         ros-${ROS_DISTRO}-xacro \
@@ -32,7 +33,7 @@ RUN echo "Europe/Budapest" > /etc/timezone
 RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
 
 # setup ros environment in shell
-RUN echo 'source /root/dora-ros/ros2_ws/src/install/setup.bash' >> /root/.bashrc
+RUN echo 'source /opt/ros/${ROS_DISTRO}/setup.bash' >> /root/.bashrc
 
 # ros copy workspace
 RUN cd /root/ && git clone https://github.com/legokor/dora-ros.git

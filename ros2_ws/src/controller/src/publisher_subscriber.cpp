@@ -2,7 +2,6 @@
 #include "controller/uart_handler.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "rclcpp/rclcpp.hpp"
-// #include <vector>
 #include <chrono>
 
 class UARTHandlerNode : public rclcpp::Node {
@@ -30,6 +29,9 @@ private:
     rclcpp::TimerBase::SharedPtr timer_;
 
     void sendTwist(const geometry_msgs::msg::Twist::SharedPtr msg) {
+        RCLCPP_INFO(this->get_logger(), "Got new target velocity: x:%f y:%f w:%f", //
+                    msg->linear.x, msg->linear.y, msg->angular.z);
+
         std::lock_guard<std::mutex> lock(uart_mutex);
         uart.sendSpeedCommand(msg->linear.x, msg->linear.y, msg->angular.z);
     }

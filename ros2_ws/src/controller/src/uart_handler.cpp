@@ -16,18 +16,18 @@ void configure_serial_port(int fd, int speed) {
     cfsetospeed(&tty, speed);
     cfsetispeed(&tty, speed);
 
-    tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;     // 8-bit chars
-    tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | INLCR | IGNCR | ICRNL);                         // disable break processing
-    tty.c_lflag = 0;                                // no signaling chars, no echo
-    tty.c_oflag = 0;                                // no remapping, no delays
-    tty.c_cc[VMIN]  = 1;                            // read doesn't return until at least 1 byte is received
-    tty.c_cc[VTIME] = 1;                            // 0.1 seconds read timeout
+    tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;                                          // 8-bit chars
+    tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | INLCR | IGNCR | ICRNL); // disable break processing
+    tty.c_lflag = 0;                                                                     // no signaling chars, no echo
+    tty.c_oflag = 0;                                                                     // no remapping, no delays
+    tty.c_cc[VMIN] = 1;  // read doesn't return until at least 1 byte is received
+    tty.c_cc[VTIME] = 1; // 0.1 seconds read timeout
 
-    tty.c_iflag &= ~(IXON | IXOFF | IXANY);         // shut off xon/xoff ctrl
-    tty.c_cflag |= (CLOCAL | CREAD);                // ignore modem controls, enable reading
-    tty.c_cflag &= ~(PARENB | PARODD);              // no parity
-    tty.c_cflag &= ~CSTOPB;                         // 1 stop bit
-    tty.c_cflag &= ~CRTSCTS;                        // no hardware flow control
+    tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
+    tty.c_cflag |= (CLOCAL | CREAD);        // ignore modem controls, enable reading
+    tty.c_cflag &= ~(PARENB | PARODD);      // no parity
+    tty.c_cflag &= ~CSTOPB;                 // 1 stop bit
+    tty.c_cflag &= ~CRTSCTS;                // no hardware flow control
 
     if (tcsetattr(fd, TCSANOW, &tty) != 0) {
         perror("tcsetattr");
@@ -146,6 +146,7 @@ bool UARTHandler::receiveFrame(uint8_t& frameType, std::vector<uint8_t>& payload
                     readingFrame = false;
                     continue;
                 }
+
                 uint8_t receivedChecksum = payload.back();
                 payload.pop_back();
 
@@ -162,3 +163,4 @@ bool UARTHandler::receiveFrame(uint8_t& frameType, std::vector<uint8_t>& payload
 
     return false;
 }
+
