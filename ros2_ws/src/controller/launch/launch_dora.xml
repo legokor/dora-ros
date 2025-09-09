@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<launch
-  xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/ros2/design/gh-pages/articles/specs/launch.0.1.1.xsd"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:xs="http://www.w3.org/2001/XMLSchema"
-  version="0.1.0">
+<launch>
+  <arg name="urdf_file" default="$(find-pkg-share controller)/res/dora.urdf" />
 
-  <include file="$(find-pkg-share rplidar_ros)/launch/rplidar_a1_launch.py">
-    <arg name="auto_standby" value="true" />
-  </include>
+  <!-- <node pkg="rplidar_ros" exec="rplidar_node" name="lidar" namespace="dora" /> -->
+  <include file="$(find-pkg-share rplidar_ros)/launch/rplidar_a1_launch.py" />
 
   <!-- <param name="robot_description" command="$(find xacro)/xacro $(arg model)" /> -->
 
