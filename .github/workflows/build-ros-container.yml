@@ -16,6 +16,8 @@ jobs:
     permissions:
       contents: read
       packages: write # needed for publishing to ghcr.io
+    env:
+      __DORA_CI_ACTION: build
 
     steps:
       - name: Log in to GitHub Container Registry

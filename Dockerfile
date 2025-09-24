@@ -44,8 +44,8 @@ RUN cd /root/dora-ros/ros2_ws/src/ && \
 
 RUN source /root/dora-ros/scripts/build.sh 
 
-# start everything on container start
-CMD ["/bin/bash", "-lc", "/root/dora-ros/scripts/run.sh"]
+# build if running in CI, run on container start
+CMD ["/bin/bash", "-lc", "/root/dora-ros/scripts/${__DORA_CI_ACTION:-run}.sh"]
 
 # rviz multistage
 FROM base AS rviz
