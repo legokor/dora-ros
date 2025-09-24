@@ -3,7 +3,7 @@ name: Build rviz container
 on:
   push:
     branches:
-      - '**'
+      - "**"
     paths:
       - .github/workflows/build-rviz-container.yml
       - rviz.dockerfile
@@ -33,6 +33,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           file: rviz.dockerfile
+          target: base
           push: true
           tags: ghcr.io/${{ github.repository }}-rviz:latest
           platforms: linux/amd64,linux/arm64

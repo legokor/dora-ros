@@ -1,13 +1,16 @@
-version: '3'
+version: "3"
 services:
   ros2:
     container_name: dora-ros
     image: ghcr.io/legokor/dora-ros:latest
+    build:
+      # multistage, we don't need dev or rviz by default
+      target: base
 
     tty: true
 
     network_mode: host
 
     devices:
-       - "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0:/dev/ttyUSB0"
-       - "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A5XK3RJT-if00-port0:/dev/ttyUSB1"
+      - "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0:/dev/ttyUSB0"
+      - "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A5XK3RJT-if00-port0:/dev/ttyUSB1"

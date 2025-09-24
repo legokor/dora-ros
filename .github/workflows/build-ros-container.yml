@@ -3,7 +3,7 @@ name: Build ros container
 on:
   push:
     branches:
-      - '**'
+      - "**"
     paths:
       - .github/workflows/build-ros-container.yml
       - Dockerfile
@@ -34,6 +34,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
+          target: base
           push: true
           tags: ghcr.io/${{ github.repository }}:latest
           platforms: linux/amd64,linux/arm64
