@@ -31,10 +31,30 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push Docker image
+      - name: Build and push base image
         uses: docker/build-push-action@v6
         with:
           target: base
+          push: true
+          tags: ghcr.io/${{ github.repository }}:latest
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push rviz image
+        uses: docker/build-push-action@v6
+        with:
+          target: rviz
+          push: true
+          tags: ghcr.io/${{ github.repository }}:latest
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push dev image
+        uses: docker/build-push-action@v6
+        with:
+          target: dev
           push: true
           tags: ghcr.io/${{ github.repository }}:latest
           platforms: linux/amd64,linux/arm64
