@@ -23,6 +23,8 @@ ControllerNode::ControllerNode() : Node("uart_handler_node"), uart("/dev/ttyUSB1
                 RCLCPP_ERROR(get_logger(), "UART read failed: %s", msg.error().c_str());
         }
     });
+
+    RCLCPP_INFO(get_logger(), "controller node initialized succesfully");
 }
 
 void ControllerNode::sendTwist(const Twist::SharedPtr& msg) {

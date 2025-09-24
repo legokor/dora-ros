@@ -7,7 +7,11 @@ int main(int argc, char** argv) {
 
     // we only create publishers, subscribers and timers during initialization
     rclcpp::executors::StaticSingleThreadedExecutor executor;
-    executor.add_node(std::make_shared<dora::ControllerNode>());
+
+    // must be declared as a variable to not be instantly dropped...
+    auto controller_node = std::make_shared<dora::ControllerNode>();
+    executor.add_node(controller_node);
+
     executor.spin();
 
     rclcpp::shutdown();
