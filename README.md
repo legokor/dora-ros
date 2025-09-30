@@ -63,3 +63,10 @@ Running like this gives the container access to your X11 session and starts `rvi
 ```bash
 docker run --rm -itv /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY --network host ghcr.io/legokor/dora-ros-rviz:latest
 ```
+
+## Move robot
+
+```bash
+ros2 topic pub -1 /dora/cmd_vel geometry_msgs/msg/Twist '{ linear: { x: 0, y: 0 }, angular: { z: 0 } }'
+```
+
