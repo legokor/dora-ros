@@ -36,7 +36,7 @@ RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
 RUN echo 'source /root/dora-ros/ros2_ws/src/install/setup.bash' >> /root/.bashrc 
 
 # ros copy workspace
-RUN cd /root/ && git clone --depth=1 https://github.com/legokor/dora-ros.git 
+RUN cd /root/ && git clone --depth=1 git@github.com:legokor/dora-ros.git 
 
 # RPLIDAR
 RUN cd /root/dora-ros/ros2_ws/src/ && \
