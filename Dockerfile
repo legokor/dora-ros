@@ -64,7 +64,7 @@ FROM rviz AS dev
 RUN apt-get remove -y neovim && \
     apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y luarocks ripgrep clangd && \
+    apt-get install -y bash-completion luarocks ripgrep clangd && \
     rm -rf /var/lib/apt/lists/* 
 
 # install newest neovim appimage from github releases

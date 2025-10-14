@@ -12,26 +12,17 @@ find_package(geometry_msgs REQUIRED)
 include_directories(include)
 
 # Create the executable
-add_executable(${CMAKE_PROJECT_NAME}
-  src/controller_node.cpp
-  src/main.cpp
-  src/uart_handler.cpp
-)
+add_executable(${CMAKE_PROJECT_NAME} src/controller_node.cpp src/main.cpp
+                                     src/uart_handler.cpp)
 
 # Link against necessary libraries
-ament_target_dependencies(${CMAKE_PROJECT_NAME}
-    rclcpp
-    geometry_msgs
-)
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC rclcpp::rclcpp
+                                                   ${geometry_msgs_TARGETS})
 
 # Install
-install(TARGETS ${CMAKE_PROJECT_NAME}
-  DESTINATION lib/${CMAKE_PROJECT_NAME})
+install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION lib/${CMAKE_PROJECT_NAME})
 
-install(DIRECTORY
-  launch res
-  DESTINATION share/${CMAKE_PROJECT_NAME}/
-)
+install(DIRECTORY launch res DESTINATION share/${CMAKE_PROJECT_NAME}/)
 
 # Ament package
 ament_package()

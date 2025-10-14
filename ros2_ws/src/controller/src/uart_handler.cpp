@@ -201,44 +201,78 @@ std::optional<std::string> UARTHandler::receiveData(std::optional<size_t> min_co
 }
 
 std::expected<size_t, std::string> UARTHandler::parseFrames() {
-    bool escape = false;
+    auto it = read_buffer.begin();
 
-    auto it = write_buffer.begin();
+    auto require_bytes = [&](size_t n) { return read_buffer.end() - it <= n; };
 
-    if (*it++ != UART_SOF) {
-        return std::unexpected("Frame doesn't start with SOF");
-    }
+    while (require_bytes(sizeof(UART_SOF) + sizeof(std::byte) + sizeof(UART_EOF))) {
+        if (*it++ != UART_SOF)
+            return std::unexpected("Frame doesn't start with SOF");
 
-    std::byte frame_type = *it++;
+        std::byte frame_type = *it++;
 
-    FrameCategory frame_category = (FrameCategory) (frame_type & FRAME_CATEGORY_MASK);
-    uint8_t frame_type_id = (uint8_t) (frame_type & FRAME_TYPE_ID_MASK);
+        FrameCategory frame_category = (FrameCategory) (frame_type & FRAME_CATEGORY_MASK);
+        uint8_t frame_type_id = (uint8_t) (frame_type & FRAME_TYPE_ID_MASK);
 
-    switch (frame_category) {
-        case FrameCategory::Reply: {
-            std::byte mseq = *it++;
+        switch (frame_category) {
+            case FrameCategory::Reply: {
+                std::byte mseq;
 
-            // TODO: handle replies
-            switch ((RequestFrameTypeID) frame_type_id) {
-                case RequestFrameTypeID::SetSpeed: break;
-                case RequestFrameTypeID::SetSettings: break;
+                if (!require_bytes(sizeof(mseq)))
+                    return sizeof(mseq);
+
+                mseq = *it++;
+
+                // TODO: handle replies
+                switch ((RequestFrameTypeID) frame_type_id) {
+                    case RequestFrameTypeID::SetSpeed: break;
+                    case RequestFrameTypeID::SetSettings: break;
+                }
+
+                break;
             }
 
-            break;
-        }
+            case FrameCategory::Stream: {
+                switch ((StreamFrameTypeID) frame_type_id) {
+                    case StreamFrameTypeID::Speed:
+                        SpeedData spd;
 
-        case FrameCategory::Stream: {
-            switch ((StreamFrameTypeID) frame_type_id) {
-                case StreamFrameTypeID::Speed: break;
-                case StreamFrameTypeID::Status: break;
+                        if (!require_bytes(sizeof(spd)))
+                            return sizeof(spd);
+
+                        std::memcpy(&spd, &*it, sizeof(spd));
+                        it += sizeof(spd);
+                        break;
+
+                    case StreamFrameTypeID::Status:
+                        RobotStatus stat;
+
+                        if (!require_bytes(sizeof(stat)))
+                            return sizeof(stat);
+
+                        // TODO: more type safe solution...
+                        std::memcpy(&stat, &*it, sizeof(stat));
+                        it += sizeof(stat);
+                        break;
+                }
+
+                break;
             }
 
-            break;
+            case FrameCategory::Request: return std::unexpected("Nucleo sent request???");
+            default: return std::unexpected("Invalid frame category");
         }
 
-        case FrameCategory::Request: return std::unexpected("Nucleo sent request???");
-        default: return std::unexpected("Invalid frame category");
+        // TODO: checksum
+
+        if (!require_bytes(sizeof(UART_EOF)))
+            return sizeof(UART_EOF);
+
+        if (*it++ != UART_EOF)
+            return std::unexpected("Frame doesn't end with EOF");
     }
+
+    return sizeof(UART_SOF) + sizeof(std::byte) + sizeof(UART_EOF);
 }
 
 UARTHandler::~UARTHandler() {
