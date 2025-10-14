@@ -1,8 +1,6 @@
 #ifndef UART_HANDLER_HPP
 #define UART_HANDLER_HPP
 
-#include "controller/frames.hpp"
-
 #include <cstdint>
 #include <expected>
 #include <optional>
