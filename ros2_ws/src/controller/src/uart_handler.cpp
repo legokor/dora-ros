@@ -264,8 +264,9 @@ std::expected<size_t, std::string> UARTHandler::parseFrames() {
         }
 
         // TODO: checksum
+        uint8_t checksum;
 
-        if (!require_bytes(sizeof(UART_EOF)))
+        if (!require_bytes(sizeof(UART_EOF) + si))
             return sizeof(UART_EOF);
 
         if (*it++ != UART_EOF)

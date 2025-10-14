@@ -19,30 +19,30 @@ RUN apt-get update && \
         # ros-${ROS_DISTRO}-rplidar-ros \
 \
     # clean up filesystem \
-    && rm -rf /var/lib/apt/lists/* 
+    && rm -rf /var/lib/apt/lists/*
 
 # make our lives easier
 RUN echo \
     $'export EDITOR=nvim\n' \
     $'alias py=python3\n' \
     $'alias c=clear\n' \
-        >> /root/.bashrc 
+        >> /root/.bashrc
 
 # timezones
-RUN echo "Europe/Budapest" > /etc/timezone 
-RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime 
+RUN echo "Europe/Budapest" > /etc/timezone
+RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
 
 # setup ros environment in shell
-RUN echo 'source /root/dora-ros/ros2_ws/src/install/setup.bash' >> /root/.bashrc 
+RUN echo 'source /root/dora-ros/ros2_ws/src/install/setup.bash' >> /root/.bashrc
 
 # ros copy workspace
-RUN cd /root/ && git clone --depth=1 git@github.com:legokor/dora-ros.git 
+RUN cd /root/ && git clone --depth=1 https://github.com/legokor/dora-ros.git
 
 # RPLIDAR
 RUN cd /root/dora-ros/ros2_ws/src/ && \
-    git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git 
+    git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git
 
-RUN source /root/dora-ros/scripts/build.sh 
+RUN source /root/dora-ros/scripts/build.sh
 
 # build if running in CI, run on container start
 CMD ["/bin/bash", "-l", "/root/dora-ros/scripts/${__DORA_CI_ACTION:-run}.sh"]
@@ -53,7 +53,7 @@ FROM base AS rviz
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y ros-${ROS_DISTRO}-rviz2 && \
-    rm -rf /var/lib/apt/lists/* 
+    rm -rf /var/lib/apt/lists/*
 
 # start rviz on container start
 CMD ["/bin/bash", "-lc", "rviz2"]
@@ -65,7 +65,7 @@ RUN apt-get remove -y neovim && \
     apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y bash-completion luarocks ripgrep clangd && \
-    rm -rf /var/lib/apt/lists/* 
+    rm -rf /var/lib/apt/lists/*
 
 # install newest neovim appimage from github releases
 RUN cd /tmp && \
@@ -73,5 +73,7 @@ RUN cd /tmp && \
     chmod u+x nvim-linux-x86_64.appimage && \
     ./nvim-linux-x86_64.appimage --appimage-extract && \
     mv squashfs-root /nvim-squashfs-root && \
-    ln -s /nvim-squashfs-root/AppRun /usr/bin/nvim 
+    ln -s /nvim-squashfs-root/AppRun /usr/bin/nvim
+
+RUN cd /root/dora-ros/ && git remote set-url origin git@github.com:legokor/dora-ros.git
 
