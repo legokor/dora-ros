@@ -152,7 +152,10 @@ void UARTHandler::sendFrame(std::byte frameType, std::span<const std::byte> payl
     write_buffer.push_back(std::byte(checksum));
     write_buffer.push_back(UART_EOF);
 
-    write(serial_port, write_buffer.data(), write_buffer.size());
+    ssize_t w = write(serial_port, write_buffer.data(), write_buffer.size());
+    if (w == -1) {
+        // TODO: error
+    }
 
     write_buffer.clear();
 }
@@ -266,7 +269,7 @@ std::expected<size_t, std::string> UARTHandler::parseFrames() {
         // TODO: checksum
         uint8_t checksum;
 
-        if (!require_bytes(sizeof(UART_EOF) + si))
+        if (!require_bytes(sizeof(UART_EOF) + checksum))
             return sizeof(UART_EOF);
 
         if (*it++ != UART_EOF)
