@@ -8,7 +8,7 @@ from sensor_msgs.msg import LaserScan
 ## end of ROS imports
 
 from typing import Protocol, override
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from threading import Thread
 from math import isfinite
@@ -75,7 +75,14 @@ class ROSWrapper(DORA, Node):
             ranges = [f for f in s.ranges if isfinite(f)]
             range_min = min(ranges)
             range_max = max(ranges)
-            self.lidar = Lidar(s.ranges.tolist(), range_min, range_max, s.angle_min, s.angle_max, s.angle_increment, s.time_increment, s.scan_time)
+            self.lidar = Lidar(
+                s.ranges.tolist(),
+                range_min, range_max,
+                s.angle_min, s.angle_max,
+                s.angle_increment,
+                s.time_increment,
+                s.scan_time
+            )
 
         self.lidar_sub = self.create_subscription(LaserScan, '/scan', got_lidar, 10)
 
