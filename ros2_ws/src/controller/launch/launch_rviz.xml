@@ -2,11 +2,6 @@
 <launch>
   <node pkg="controller" exec="controller" name="controller" namespace="dora" />
 
-  <include file="$(find-pkg-share rplidar_ros)/launch/rplidar_a1_launch.py">
-    <arg name="serial_port" value="/dev/ttyUSB0" />
-    <arg name="auto_standby" value="true" />
-  </include>
-
   <let name="urdf_file" value="$(find-pkg-share controller)/res/dora.urdf" />
   <let name="config_file" value="$(find-pkg-share controller)/res/dora_config.rviz" />
   <let name="urdf" value="$(command 'xacro $(var urdf_file)')" />
@@ -24,6 +19,13 @@
     <param name="output" value="screen" />
     <param name="robot_description" value="$(var urdf)" />
     <param name="frame_prefix" value="dora/" />
+  </node>
+
+  <node pkg="rviz2" exec="rviz2" args="-d $(var config_file)"
+    name="rviz2" output="screen">
+
+    <remap from="/robot_description" to="/dora/robot_description" />
+
   </node>
 
 </launch>

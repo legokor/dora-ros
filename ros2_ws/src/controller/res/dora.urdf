@@ -2,11 +2,20 @@
 <robot name="dora" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <!-- Original body height: 100 -->
+    <xacro:property name="original_height" value="100" />
     <xacro:property name="body_scale" value="0.005" />
-    <xacro:property name="body_height" value="${100*body_scale}" />
+    <xacro:property name="body_height" value="${original_height*body_scale}" />
 
     <xacro:property name="body_pos" value="0.0 0.0 ${body_height/2}" />
     <xacro:property name="body_scale_xyz" value="${body_scale} ${body_scale} ${body_scale}" />
+
+    <xacro:property name="lidar_radius" value="40" />
+    <xacro:property name="lidar_length" value="20" />
+    <xacro:property name="lidar_distance" value="1.5" />
+
+    <xacro:property name="wheel_radius" value="30" />
+    <xacro:property name="wheel_length" value="25" />
+    <xacro:property name="wheel_distance" value="205" />
 
     <xacro:property name="mesh_path" value="package://controller/res/dora_vaz.stl" />
 
@@ -42,7 +51,7 @@
             <origin rpy="0 0 0"/>
 
             <geometry>
-                <cylinder radius="${40*body_scale}" length="${20*body_scale}"/>
+                <cylinder radius="${lidar_radius*body_scale}" length="${lidar_length*body_scale}"/>
             </geometry>
 
             <material name="plastic">
@@ -55,7 +64,7 @@
             <origin rpy="0 0 0" />
 
             <geometry>
-                <cylinder radius="${40*body_scale}" length="${20*body_scale}"/>
+                <cylinder radius="${lidar_radius*body_scale}" length="${lidar_length*body_scale}"/>
             </geometry>
         </collision>
     </link>
@@ -63,7 +72,7 @@
     <joint name="lidar_joint" type="fixed">
         <parent link="base_link"/>
         <child link="lidar_link"/>
-        <origin xyz="0 0 ${body_height*1.5}"/>
+        <origin xyz="0 0 ${body_height*lidar_distance}"/>
     </joint>
 
     <!-- Base Joint -->
@@ -74,7 +83,7 @@
         <origin xyz="0 0 ${-body_height/10}" rpy="0 0 0"/>
     </joint>
 
-    <!-- Wheels and Wheel Joins-->
+    <!-- Wheels and Wheel Joints-->
 
     <xacro:macro name="omniwheel" params="idx">
         <xacro:property name="angle" value='${0.5 * pi + 2 * pi * idx / 3}' />
@@ -82,7 +91,7 @@
         <joint name="wheel_joint_${idx}" type="continuous">
             <parent link="base_link" />
             <child link="wheel_${idx}" />
-            <origin xyz="${cos(angle)*body_scale*205} ${sin(angle)*body_scale*205} ${body_height*0.25}" rpy="0 0 0" />
+            <origin xyz="${cos(angle)*body_scale*wheel_distance} ${sin(angle)*body_scale*wheel_distance} ${body_height*0.25}" rpy="0 0 0" />
             <axis xyz="${cos(angle)} ${sin(angle)} 0" />
         </joint>
 
@@ -91,7 +100,7 @@
                 <origin rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
 
                 <geometry>
-                    <cylinder radius="${30*body_scale}" length="${25*body_scale}" />
+                    <cylinder radius="${wheel_radius*body_scale}" length="${wheel_length*body_scale}" />
                 </geometry>
             </collision>
 
@@ -99,7 +108,7 @@
                 <origin rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
 
                 <geometry>
-                    <cylinder radius="${30*body_scale}" length="${25*body_scale}" />
+                    <cylinder radius="${wheel_radius*body_scale}" length="${wheel_length*body_scale}" />
                 </geometry>
 
                 <material name="metal">
