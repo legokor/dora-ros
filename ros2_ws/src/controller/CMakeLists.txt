@@ -10,6 +10,8 @@ find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 
 include_directories(include)
+include_directories(launch)
+include_directories(res)
 
 # Create the executable
 add_executable(${CMAKE_PROJECT_NAME} src/controller_node.cpp src/main.cpp
@@ -23,6 +25,8 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC rclcpp::rclcpp
 install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION lib/${CMAKE_PROJECT_NAME})
 
 install(DIRECTORY launch res DESTINATION share/${CMAKE_PROJECT_NAME}/)
+
+ament_export_dependencies(rosidl_default_runtime)
 
 # Ament package
 ament_package()

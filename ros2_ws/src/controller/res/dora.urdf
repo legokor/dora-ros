@@ -1,11 +1,17 @@
 <?xml version="1.0"?>
 <robot name="dora" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <xacro:property name="body_height" value="0.5" />
+    <!-- Original body height: 100 -->
     <xacro:property name="body_scale" value="0.005" />
+    <xacro:property name="body_height" value="${100*body_scale}" />
 
-    <xacro:property name="body_pos" value="0 0 ${body_height * body_scale}" />
+    <xacro:property name="body_pos" value="0.0 0.0 ${body_height/2}" />
     <xacro:property name="body_scale_xyz" value="${body_scale} ${body_scale} ${body_scale}" />
+
+    <xacro:property name="mesh_path" value="package://controller/res/dora_vaz.stl" />
+
+    <!-- Robot Footprint -->
+    <link name="base_footprint"/>
 
     <!-- Base Link -->
     <link name="base_link">
@@ -13,7 +19,7 @@
             <origin xyz="${body_pos}" />
 
             <geometry>
-                <mesh filename="file://$(find controller)/res/dora_vaz.stl" scale="${body_scale_xyz}" />
+                <mesh filename="${mesh_path}" scale="${body_scale_xyz}" />
             </geometry>
 
             <material name="wood">
@@ -25,10 +31,50 @@
             <origin xyz="${body_pos}" />
 
             <geometry>
-                <mesh filename="file://$(find controller)/res/dora_vaz.stl" scale="${body_scale_xyz}" />
+                <mesh filename="${mesh_path}" scale="${body_scale_xyz}" />
             </geometry>
         </collision>
     </link>
+
+    <!-- Lidar Link and Joint -->
+    <link name = "lidar_link">
+        <visual>
+            <origin rpy="0 0 0"/>
+
+            <geometry>
+                <cylinder radius="${40*body_scale}" length="${20*body_scale}"/>
+            </geometry>
+
+            <material name="plastic">
+                <color rgba="0.1 0.1 0.1 1" />
+            </material>
+
+        </visual>
+
+        <collision>
+            <origin rpy="0 0 0" />
+
+            <geometry>
+                <cylinder radius="${40*body_scale}" length="${20*body_scale}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="lidar_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="lidar_link"/>
+        <origin xyz="0 0 ${body_height*1.5}"/>
+    </joint>
+
+    <!-- Base Joint -->
+
+    <joint name="base_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="base_footprint"/>
+        <origin xyz="0 0 ${-body_height/10}" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Wheels and Wheel Joins-->
 
     <xacro:macro name="omniwheel" params="idx">
         <xacro:property name="angle" value='${0.5 * pi + 2 * pi * idx / 3}' />
@@ -36,7 +82,7 @@
         <joint name="wheel_joint_${idx}" type="continuous">
             <parent link="base_link" />
             <child link="wheel_${idx}" />
-            <origin xyz="${cos(angle)} ${sin(angle)} ${-body_height * 0.25}" rpy="0 0 0" />
+            <origin xyz="${cos(angle)*body_scale*205} ${sin(angle)*body_scale*205} ${body_height*0.25}" rpy="0 0 0" />
             <axis xyz="${cos(angle)} ${sin(angle)} 0" />
         </joint>
 
@@ -45,7 +91,7 @@
                 <origin rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
 
                 <geometry>
-                    <cylinder radius="0.1" length="0.02" />
+                    <cylinder radius="${30*body_scale}" length="${25*body_scale}" />
                 </geometry>
             </collision>
 
@@ -53,8 +99,12 @@
                 <origin rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
 
                 <geometry>
-                    <cylinder radius="0.1" length="0.02" />
+                    <cylinder radius="${30*body_scale}" length="${25*body_scale}" />
                 </geometry>
+
+                <material name="metal">
+                    <color rgba="0.55 0.55 0.55 1" />
+                </material>
             </visual>
         </link>
     </xacro:macro>
