@@ -11,7 +11,7 @@
 
     <xacro:property name="lidar_radius" value="40" />
     <xacro:property name="lidar_length" value="20" />
-    <xacro:property name="lidar_distance" value="1.5" />
+    <xacro:property name="lidar_distance" value="1.4" />
 
     <xacro:property name="wheel_radius" value="30" />
     <xacro:property name="wheel_length" value="25" />
@@ -45,7 +45,16 @@
         </collision>
     </link>
 
+    <!-- Base Joint -->
+
+    <joint name="base_joint" type="fixed">
+        <parent link="base_footprint"/>
+        <child link="base_link"/>
+        <origin xyz="0 0 ${body_height/20}" rpy="0 0 0"/>
+    </joint>
+
     <!-- Lidar Link and Joint -->
+
     <link name = "lidar_link">
         <visual>
             <origin rpy="0 0 0"/>
@@ -75,15 +84,8 @@
         <origin xyz="0 0 ${body_height*lidar_distance}"/>
     </joint>
 
-    <!-- Base Joint -->
-
-    <joint name="base_joint" type="fixed">
-        <parent link="base_link"/>
-        <child link="base_footprint"/>
-        <origin xyz="0 0 ${-body_height/10}" rpy="0 0 0"/>
-    </joint>
-
     <!-- Wheels and Wheel Joints-->
+    <!-- Old axis, ${cos(angle)} ${sin(angle)} 0 -->
 
     <xacro:macro name="omniwheel" params="idx">
         <xacro:property name="angle" value='${0.5 * pi + 2 * pi * idx / 3}' />
@@ -91,13 +93,13 @@
         <joint name="wheel_joint_${idx}" type="continuous">
             <parent link="base_link" />
             <child link="wheel_${idx}" />
-            <origin xyz="${cos(angle)*body_scale*wheel_distance} ${sin(angle)*body_scale*wheel_distance} ${body_height*0.25}" rpy="0 0 0" />
-            <axis xyz="${cos(angle)} ${sin(angle)} 0" />
+            <origin xyz="${cos(angle)*body_scale*wheel_distance} ${sin(angle)*body_scale*wheel_distance} ${body_height*0.25}" rpy="${-0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
+            <axis xyz="0 0 1" />
         </joint>
 
         <link name="wheel_${idx}">
             <collision>
-                <origin rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
+                <origin rpy="0 0 0" />
 
                 <geometry>
                     <cylinder radius="${wheel_radius*body_scale}" length="${wheel_length*body_scale}" />
@@ -105,7 +107,7 @@
             </collision>
 
             <visual>
-                <origin rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
+                <origin rpy="0 0 0" />
 
                 <geometry>
                     <cylinder radius="${wheel_radius*body_scale}" length="${wheel_length*body_scale}" />

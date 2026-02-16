@@ -1,0 +1,11 @@
+digraph G {
+"dora/base_link" -> "dora/wheel_0"[label=" Broadcaster: default_authority\nAverage rate: 10.198\nBuffer length: 5.099\nMost recent transform: 1770745659.713327\nOldest transform: 1770745654.614052\n"];
+"dora/base_link" -> "dora/wheel_1"[label=" Broadcaster: default_authority\nAverage rate: 10.198\nBuffer length: 5.099\nMost recent transform: 1770745659.713327\nOldest transform: 1770745654.614052\n"];
+"dora/base_link" -> "dora/wheel_2"[label=" Broadcaster: default_authority\nAverage rate: 10.198\nBuffer length: 5.099\nMost recent transform: 1770745659.713327\nOldest transform: 1770745654.614052\n"];
+"dora/base_link" -> "dora/base_footprint"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dora/base_link" -> "dora/lidar_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1770745659.727287"[ shape=plaintext ] ;
+}->"dora/base_link";
+}
