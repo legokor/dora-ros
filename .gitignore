@@ -1,6 +1,7 @@
 build/
 log/
 install/
+.vscode/
 
 /ros2_ws/src/rplidar_ros/
 
