@@ -8,7 +8,7 @@
       "includePath": [
         "/opt/ros/humble/include/**",
         "/home/student/dora-ros/ros2_ws/src/controller/include/**",
-        "/home/student/dora-ros/ros2_ws/src/drift_control/include/**",
+        "/home/student/dora-ros/ros2_ws/src/teleop_control/include/**",
         "/usr/include/**"
       ],
       "name": "ros2",

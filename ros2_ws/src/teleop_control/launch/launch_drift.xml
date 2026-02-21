@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <node pkg="teleop_control" exec="teleop_key" name="teleop_key" output="screen">
+        <remap from="cmd_vel" to="drift_cmd_vel"/>
+    </node>
+
+    <node pkg="teleop_control" exec="drift_control" name="drift_control" output="screen">
+        <param name="damping" value="2.0"/>
+    </node>
+
+</launch>
