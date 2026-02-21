@@ -19,7 +19,7 @@ class DriftNode : public Node {
             linSpeed += (msg->linear.x-linDeaccel) / dam;
             linSpeed *= cos(angSpeed);
 
-            double angDeaccel = angSpeed*0.125;
+            double angDeaccel = angSpeed*0.1;
 
             angSpeed += (msg->angular.z-angDeaccel) / dam;
 
