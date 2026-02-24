@@ -1,3 +1,0 @@
-CompileFlags:
-  CompilationDatabase: /root/dora-ros/ros2_ws/src/build/
-  BuiltinHeaders: QueryDriver
