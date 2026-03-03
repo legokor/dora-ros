@@ -7,6 +7,7 @@
 #include <cerrno>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 #include <iostream>
 #include <span>
@@ -17,6 +18,10 @@ namespace dora {
 constexpr static std::byte UART_SOF = std::byte(42);
 constexpr static std::byte UART_ESC = std::byte(123);
 constexpr static std::byte UART_EOF = std::byte(69);
+
+
+// R: saját comment, Remove
+// C: Comment, ami jó ha bennemarad
 
 static void configure_serial_port(int fd, int speed) {
     struct termios t;
@@ -51,7 +56,9 @@ static void configure_serial_port(int fd, int speed) {
 }
 
 UARTHandler::UARTHandler(const std::string& port, uint32_t baud_rate) {
+	// R: Serial port megnyitása
     serial_port = open(port.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
+    // R: Itt hiba lesz, mert az én gépemen nincs UART port, de megoldom
     if (serial_port == -1) {
         std::cerr << "Error opening UART port!" << std::endl;
         exit(1);
@@ -63,8 +70,12 @@ UARTHandler::UARTHandler(const std::string& port, uint32_t baud_rate) {
     write_buffer.resize(4096);
 }
 
+// R: ezt a függvényét hívják meg, amikor szeretnének egy üzenetet beolvasni
+// blokkolón új threadet nyitnak a beolvasásnak,
+// mert ez a függvény blokkol, amíg meg nem érkezik az üzenet / visszaadja a már beolvasottakat
 std::expected<ReceivedMessage, std::string> UARTHandler::receiveMessage() {
     if (!parsedMessages.empty()) {
+    	// R: ha van már beolvasott üzenet, visszaadja
         auto m = parsedMessages.front();
         parsedMessages.pop();
         return m;
@@ -88,8 +99,10 @@ std::expected<ReceivedMessage, std::string> UARTHandler::receiveMessage() {
 
         if (p) {
             // incomplete message, we need more data to parse it
+            // R: valójában itt történik az adatok olvasása
             auto e = receiveData(*p);
 
+            // R: optional konvertálása errorrá
             // error while reading from serial
             if (e)
                 return std::unexpected(e.value());
@@ -127,6 +140,7 @@ static std::byte unescape(std::byte b) {
     }
 }
 
+// elméletben ez működik, nem kell vele foglalkozni
 void UARTHandler::sendFrame(std::byte frameType, std::span<const std::byte> payload) {
     write_buffer.push_back(UART_SOF);
 
@@ -161,6 +175,7 @@ void UARTHandler::sendFrame(std::byte frameType, std::span<const std::byte> payl
 }
 
 size_t unescapeBuffer(std::span<std::byte> buf) {
+	// R: new_size a ciklusváltozója az új buffernek, amiben már nincsenek escape / egyéb kontroll karakterek
     size_t new_size = 0;
 
     for (size_t i = 0; i < buf.size(); i++) {
@@ -176,6 +191,8 @@ size_t unescapeBuffer(std::span<std::byte> buf) {
 }
 
 std::optional<std::string> UARTHandler::receiveData(std::optional<size_t> min_count) {
+	// R: kapacitásra / min_count-ra kiegészíti
+
     size_t offset = read_buffer.size();
     size_t remaining = read_buffer.capacity() - offset;
 
@@ -183,6 +200,10 @@ std::optional<std::string> UARTHandler::receiveData(std::optional<size_t> min_co
     if (min_count && remaining < *min_count) {
         remaining = *min_count;
     }
+
+
+    // R: resize az, hogy elemeket is rak be oda
+    // hogy a read tudjon bele olvasni
 
     // set size to fit new data
     read_buffer.resize(offset + remaining);
@@ -198,16 +219,27 @@ std::optional<std::string> UARTHandler::receiveData(std::optional<size_t> min_co
 
     // unescape to make parsing easier
     size_t new_size = unescapeBuffer(std::span(read_buffer).subspan(offset));
+
     read_buffer.resize(new_size);
 
     return {};
 }
 
+// R: gondolom frame-ek parsolása, magyarul a bufferben lévő üzenetek olvasása
 std::expected<size_t, std::string> UARTHandler::parseFrames() {
     auto it = read_buffer.begin();
 
+    // Frame felépítése:
+    // SOF, type, [ha request/reply typus, akkor sequence number], <data> ... ,  checksum, EOF
+    // type lehet request, reply, stream
+
+    // R: függvény, ami ellenőrzi, hogy van-e még annyi byte hátra
     auto require_bytes = [&](size_t n) { return read_buffer.end() - it <= n; };
 
+    // R: ennek a sizeof-nak nincs értelme, mindig 3 lesz
+    // gondolom olvashatóbb?
+    //
+    // R: feltételezzük, hogy a buffer új frame-nél kezdődik
     while (require_bytes(sizeof(UART_SOF) + sizeof(std::byte) + sizeof(UART_EOF))) {
         if (*it++ != UART_SOF)
             return std::unexpected("Frame doesn't start with SOF");
@@ -220,7 +252,11 @@ std::expected<size_t, std::string> UARTHandler::parseFrames() {
         switch (frame_category) {
             case FrameCategory::Reply: {
                 std::byte mseq;
-
+                // HIBA szerintem, + 1 kéne az EOF-nek
+                // mert amúgy ezeken mindig átmegy
+                //
+                // Ha jól értem az üzenet SOF, type, [ebben az esetben egy mseq], EOS
+                // Ebben az esetben átjött SOF és type, de már EOS miatt require_bytes()-oztunk eleget
                 if (!require_bytes(sizeof(mseq)))
                     return sizeof(mseq);
 

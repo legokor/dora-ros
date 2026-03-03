@@ -1,5 +1,6 @@
 #include "controller/controller_node.hpp"
 
+// miért nincs használva?
 #include "rclcpp/rclcpp.hpp"
 
 int main(int argc, char** argv) {
