@@ -1,3 +1,5 @@
+#!/root/dora-ros/asd/bin/python3
+
 import rclpy
 from rclpy.node import Node
 from rclpy.executors import ExternalShutdownException
@@ -13,6 +15,10 @@ from dataclasses import dataclass
 from threading import Thread
 from math import isfinite
 from time import sleep
+
+import cv2
+import numpy as np
+from ultralytics import YOLO
 
 @dataclass
 class Lidar():
@@ -54,8 +60,9 @@ class DORA(Protocol):
         :param y: Horizontal speed in y
         :param w: Rotational speed
         """
+        print('empty motor')
 
-class ROSWrapper(DORA, Node):
+class ROSWrapper(Node, DORA):
     vel_x: float = 0
     vel_y: float = 0
     vel_w: float = 0
@@ -64,12 +71,12 @@ class ROSWrapper(DORA, Node):
 
     def __init__(self):
         super().__init__('ROSWrapper')
-        self.vel_pub = self.create_publisher(Twist, '/dora/cmd_vel', 10)
+        self.vel_pub = self.create_publisher(Twist, '/cmd_vel', 10)
 
         def got_vel(v: Twist):
             self.vel_x, self.vel_y, self.vel_w = v.linear.x, v.linear.y, v.angular.z
 
-        self.vel_sub = self.create_subscription(Twist, '/dora/odom', got_vel, 10)
+        self.vel_sub = self.create_subscription(Twist, '/odom', got_vel, 10)
 
         def got_lidar(s: LaserScan):
             ranges = [f for f in s.ranges if isfinite(f)]
@@ -93,14 +100,19 @@ class ROSWrapper(DORA, Node):
             angular=Vector3(x=0.0, y=0.0, z=float(w))
         )
 
+        print(f'motor: {x=} {y=} {w=} {self.vel_pub}')
+
         self.vel_pub.publish(v)
 
 def main():
     with rclpy.init():
+        print('rclpy inited')
         node = ROSWrapper()
+        print('node created')
 
         def spin_node():
             try:
+                print('spinning node')
                 rclpy.spin(node)
             except KeyboardInterrupt:
                 # print('spin interrupted')
@@ -113,13 +125,16 @@ def main():
         t.start()
 
         try:
+            print('mi_main')
             mi_main(node)
         except KeyboardInterrupt:
             # print('mi_main interrupted')
             pass
-        except:
+        except err:
             # print('mi_main exception')
-            pass
+            raise err
+
+        node.motor(0,0,0)
 
         try:
             # print('thread joining')
@@ -130,12 +145,76 @@ def main():
 
         # print('thread joined')
 
+model = YOLO("yolov8n.pt")
+cap = cv2.VideoCapture(0)
+
+import time
+
 def mi_main(dora: DORA):
+    tolerance = 50       # pixels around center considered “aligned”
+    kp = 0.01            # proportional gain for turning kb 0.005 - 0.1
+    rotation_speed = 0.2 # search rotation speed
+    ball_centered = False  # once True, robot stays still
+
     while True: # cv.waitKey(1):
-        dora.motor(0, 0, 1)
-        print(f'{dora.vel_x=}, {dora.vel_y=}, {dora.vel_w=} {dora.lidar.range_min=} {dora.lidar.range_max=}')
-        sleep(1)
+        # Get camera frame
+        ret, frame = cap.read()
+        print('cap read')
+
+        if not ret:
+            print('not ret...')
+            break
+
+        # Resize for YOLO 
+        frame_resized = cv2.resize(frame, (512, 512))
+        print('resized')
+        frame_resized = cv2.flip(frame_resized, 0)
+        print('flipped')
+
+        results = model.predict(frame_resized, conf=0.5, verbose=False) #valószínűleg lassú TODO: optimalizálás
+        print('predicted')
+        ball_detected = len(results[0].boxes) > 0
+
+        if not ball_centered:
+            if ball_detected:
+                dora.motor(0, 0, 0)
+                # Get ball position
+                box = results[0].boxes.xyxy[0]
+                name = model.names[int(results[0].boxes.cls[0])]
+                x1, y1, x2, y2 = map(int, box)
+                cx = (x1 + x2) // 2
+                error = cx - 256  # center of 512-wide image
+
+                print(f"{name} detected at x={cx}, error={error}")
+
+                # Draw visuals
+                cv2.rectangle(frame_resized, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                cv2.circle(frame_resized, (cx, (y1 + y2)//2), 4, (0, 0, 255), -1)
+                cv2.putText(frame_resized, name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+
+                cv2.imwrite(f'detect-{time.time()}.jpg', frame_resized)
+
+                # Rotate until centered
+                if abs(error) <= tolerance:
+                    dora.motor(0, 0, 0)
+                    ball_centered = True
+                    print("Ball centered! Robot goes straight.")
+                else:
+                    turn = kp * error * rotation_speed
+                    dora.motor(0, 0, turn)
+            else:
+                # Search for ball
+                dora.motor(0, 0, rotation_speed)
+                print("Searching for ball...")
+        else:
+            # Ball centered once, go straight
+            dora.motor(0, 1, 0)
+            print("Ball was centered previously. Robot goes straight.")
+        
+    cap.release()
+    cv2.destroyAllWindows()
 
 if __name__ == '__main__':
+    print('main...?')
     main()
 

@@ -13,7 +13,7 @@ ControllerNode::ControllerNode() : Node("uart_handler_node"), uart("/dev/ttyUSB1
     velocity_subscriber = create_subscription<Twist>("cmd_vel", 10, [this](Twist::SharedPtr t) { sendTwist(t); });
     imu_publisher = create_publisher<Twist>("odom", 10);
 
-    io_thread = std::thread([this]() {
+    /*io_thread = std::thread([this]() {
         while (io_thread_running) {
             std::expected<ReceivedMessage, std::string> msg = uart.receiveMessage();
 
@@ -22,12 +22,13 @@ ControllerNode::ControllerNode() : Node("uart_handler_node"), uart("/dev/ttyUSB1
             else
                 RCLCPP_ERROR(get_logger(), "UART read failed: %s", msg.error().c_str());
         }
-    });
+    });*/
 
     RCLCPP_INFO(get_logger(), "controller node initialized succesfully");
 }
 
 void ControllerNode::sendTwist(const Twist::SharedPtr& msg) {
+    RCLCPP_INFO(get_logger(), "sending twist");
     uart.sendSpeedCommand(msg->linear.x, msg->linear.y, msg->angular.z);
 }
 
