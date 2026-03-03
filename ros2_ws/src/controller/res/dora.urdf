@@ -1,19 +1,29 @@
 <?xml version="1.0"?>
 <robot name="dora" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <xacro:property name="body_height" value="0.5" />
-    <xacro:property name="body_scale" value="0.005" />
+    <xacro:property name="body_height" value="0.103" />
+    <xacro:property name="body_to_floor" value="0.012" />
 
-    <xacro:property name="body_pos" value="0 0 ${body_height * body_scale}" />
-    <xacro:property name="body_scale_xyz" value="${body_scale} ${body_scale} ${body_scale}" />
+    <xacro:property name="axle_to_center_dist" value="0.18" />
+    <xacro:property name="wheel_axle_length" value="0.025" />
+    <xacro:property name="wheel_diameter" value="0.056" />
+    <xacro:property name="wheel_width" value="0.023" />
 
-    <!-- Base Link -->
+    <xacro:property name="lidar_height" value="0.045" />
+
+    <!-- TODO: make it work without internet access -->
+    <xacro:property name="mesh_path"
+        value="https://raw.githubusercontent.com/legokor/dora-ros/refs/heads/master/ros2_ws/src/controller/res/dora_vaz.stl" />
+
+    <!-- TODO: scale down mesh in stl -->
+    <xacro:property name="mesh_scale" value="0.001 0.001 0.001" />
+
     <link name="base_link">
         <visual>
-            <origin xyz="${body_pos}" />
+            <origin xyz="0 0 ${body_to_floor + body_height / 2}" rpy="0 0 ${pi / 3}" />
 
             <geometry>
-                <mesh filename="file://$(find controller)/res/dora_vaz.stl" scale="${body_scale_xyz}" />
+                <mesh filename="${mesh_path}" scale="${mesh_scale}" />
             </geometry>
 
             <material name="wood">
@@ -22,21 +32,33 @@
         </visual>
 
         <collision>
-            <origin xyz="${body_pos}" />
+            <origin xyz="0 0 ${body_to_floor + body_height / 2}" rpy="0 0 ${pi / 3}" />
 
             <geometry>
-                <mesh filename="file://$(find controller)/res/dora_vaz.stl" scale="${body_scale_xyz}" />
+                <mesh filename="${mesh_path}" scale="${mesh_scale}" />
             </geometry>
         </collision>
     </link>
 
+    <link name="base_lidar"></link>
+    <joint name="lidar_joint" type="fixed">
+        <parent link="base_link" />
+        <child link="base_lidar" />
+        <origin xyz="0 0 ${body_to_floor + body_height + lidar_height}" />
+    </joint>
+
     <xacro:macro name="omniwheel" params="idx">
-        <xacro:property name="angle" value='${0.5 * pi + 2 * pi * idx / 3}' />
+        <xacro:property name="angle" value='${pi / 6 + 2 * pi * idx / 3}' />
+        <xacro:property name="wheel_dist"
+            value="${axle_to_center_dist + wheel_axle_length}" />
 
         <joint name="wheel_joint_${idx}" type="continuous">
             <parent link="base_link" />
             <child link="wheel_${idx}" />
-            <origin xyz="${cos(angle)} ${sin(angle)} ${-body_height * 0.25}" rpy="0 0 0" />
+            <origin
+                xyz="${cos(angle) * wheel_dist} ${sin(angle) * wheel_dist} ${wheel_diameter / 2}"
+                rpy="0 0 0"
+            />
             <axis xyz="${cos(angle)} ${sin(angle)} 0" />
         </joint>
 
@@ -45,7 +67,7 @@
                 <origin rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
 
                 <geometry>
-                    <cylinder radius="0.1" length="0.02" />
+                    <cylinder radius="${wheel_diameter / 2}" length="${wheel_width}" />
                 </geometry>
             </collision>
 
@@ -53,7 +75,7 @@
                 <origin rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
 
                 <geometry>
-                    <cylinder radius="0.1" length="0.02" />
+                    <cylinder radius="${wheel_diameter / 2}" length="${wheel_width}" />
                 </geometry>
             </visual>
         </link>

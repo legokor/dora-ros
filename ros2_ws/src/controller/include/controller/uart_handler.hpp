@@ -39,7 +39,7 @@ enum class RequestFrameTypeID : uint8_t {
 };
 
 enum class StreamFrameTypeID : uint8_t {
-    Speed = 0b0000000,
+    Speed = 0b00000001,
     Status = 0b00000010,
 };
 

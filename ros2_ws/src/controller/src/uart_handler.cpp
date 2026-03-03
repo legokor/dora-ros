@@ -59,7 +59,7 @@ UARTHandler::UARTHandler(const std::string& port, uint32_t baud_rate) {
 
     configure_serial_port(serial_port, baud_rate);
 
-    read_buffer.resize(1024);
+    read_buffer.resize(64);
     write_buffer.resize(4096);
 }
 
@@ -198,6 +198,10 @@ std::optional<std::string> UARTHandler::receiveData(std::optional<size_t> min_co
 
     // unescape to make parsing easier
     size_t new_size = unescapeBuffer(std::span(read_buffer).subspan(offset));
+
+    // move back
+    std::memmove(read_buffer.data(), read_buffer.data() + offset, new_size);
+
     read_buffer.resize(new_size);
 
     return {};
@@ -206,7 +210,7 @@ std::optional<std::string> UARTHandler::receiveData(std::optional<size_t> min_co
 std::expected<size_t, std::string> UARTHandler::parseFrames() {
     auto it = read_buffer.begin();
 
-    auto require_bytes = [&](size_t n) { return read_buffer.end() - it <= n; };
+    auto require_bytes = [&](size_t n) { return read_buffer.end() - it > n; };
 
     while (require_bytes(sizeof(UART_SOF) + sizeof(std::byte) + sizeof(UART_EOF))) {
         if (*it++ != UART_SOF)
@@ -244,7 +248,9 @@ std::expected<size_t, std::string> UARTHandler::parseFrames() {
                             return sizeof(spd);
 
                         std::memcpy(&spd, &*it, sizeof(spd));
+                        parsedMessages.push(spd);
                         it += sizeof(spd);
+
                         break;
 
                     case StreamFrameTypeID::Status:
@@ -255,6 +261,7 @@ std::expected<size_t, std::string> UARTHandler::parseFrames() {
 
                         // TODO: more type safe solution...
                         std::memcpy(&stat, &*it, sizeof(stat));
+                        parsedMessages.push(stat);
                         it += sizeof(stat);
                         break;
                 }
