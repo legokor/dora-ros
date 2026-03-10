@@ -1,7 +1,13 @@
 #include "controller/uart_handler.hpp"
 
+#include <asm-generic/errno.h>
+#include <cstdlib>
+#include <expected>
 #include <fcntl.h>
+#include <format>
+#include <optional>
 #include <termios.h>
+#include <type_traits>
 #include <unistd.h>
 
 #include <cerrno>
@@ -13,11 +19,34 @@
 #include <span>
 #include <variant>
 
-namespace dora {
+//CHANGE miért nem volt itt eddig a vektor?
+#include <vector>
 
+// CHANGE ezek a függvények
+
+void debugbyte(std::byte b){
+	static int hanyadik = 0;
+	std::cerr << std::format("byte{}: {:02x}", hanyadik++, std::to_integer<unsigned char>(b))<<std::endl;
+}
+
+void printreadbuffer(std::vector<std::byte> read_buffer){
+	std::cerr<<"--- Start of read buffer ---"<<std::endl;
+	for(std::byte b : read_buffer){
+  // thx gemini
+  // átcastolja a byteot char-á, majd formázza szigorúan kétjegyű hexa számként
+     	std::cerr << std::format("{:02x}", std::to_integer<unsigned char>(b));
+    }
+    std::cerr<<std::endl;
+}
+
+namespace dora {
 constexpr static std::byte UART_SOF = std::byte(42);
 constexpr static std::byte UART_ESC = std::byte(123);
 constexpr static std::byte UART_EOF = std::byte(69);
+
+// maximum length of read buffer
+// 128 should be enough for message lengths of ~10 bytes
+const int READ_BUFFER_MAX_LEN = 128;
 
 
 // R: saját comment, Remove
@@ -56,8 +85,11 @@ static void configure_serial_port(int fd, int speed) {
 }
 
 UARTHandler::UARTHandler(const std::string& port, uint32_t baud_rate) {
+	// CHANGE: átlépem az uart port konfigurálását
+
 	// R: Serial port megnyitása
     serial_port = open(port.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
+
     // R: Itt hiba lesz, mert az én gépemen nincs UART port, de megoldom
     if (serial_port == -1) {
         std::cerr << "Error opening UART port!" << std::endl;
@@ -66,50 +98,44 @@ UARTHandler::UARTHandler(const std::string& port, uint32_t baud_rate) {
 
     configure_serial_port(serial_port, baud_rate);
 
-    read_buffer.resize(1024);
+    // reserve 128 and have size 64
+    // reserving twice the length because unescaping can double the length of the vector
+    read_buffer.reserve(READ_BUFFER_MAX_LEN);
+    // resizing is no longer needed
+    // read_buffer.resize(READ_BUFFER_MAX_LEN / 2);
     write_buffer.resize(4096);
 }
 
-// R: ezt a függvényét hívják meg, amikor szeretnének egy üzenetet beolvasni
-// blokkolón új threadet nyitnak a beolvasásnak,
-// mert ez a függvény blokkol, amíg meg nem érkezik az üzenet / visszaadja a már beolvasottakat
+// This function returns one of the already parsed messages, or reads from UART until a message is parsed, if the parsed messages queue is empty.
 std::expected<ReceivedMessage, std::string> UARTHandler::receiveMessage() {
-    if (!parsedMessages.empty()) {
-    	// R: ha van már beolvasott üzenet, visszaadja
-        auto m = parsedMessages.front();
-        parsedMessages.pop();
-        return m;
-    }
+	// try to read and parse messages until we get something
+	int tries = 0;
+	while (parsedMessages.empty()) {
+		// too many tries
+		if(tries++ > 10)
+			return std::unexpected("Too many tries trying to receive message");
 
-    // receive any amount of data
-    auto e = receiveData(std::nullopt);
-    if (e)
-        return std::unexpected(*e);
 
-    while (true) {
-        // try parsing frames
+		// félig kész üzeneteknél ez hot loop lesz?
+
+		// try to fill read_buffer from UART
+		auto e = receiveData(std::nullopt);
+		// got some error
+		if (e)
+        	return std::unexpected(*e);
+
+	 	// try parsing frames from read_buffer to parsedMessages
         std::expected<size_t, std::string> p = parseFrames();
 
-        // success, return one
-        if (!parsedMessages.empty()) {
-            auto m = parsedMessages.front();
-            parsedMessages.pop();
-            return m;
+        // return error from parsing
+        if(!p.has_value()){
+       		return std::unexpected(p.error());
         }
+	}
 
-        if (p) {
-            // incomplete message, we need more data to parse it
-            // R: valójában itt történik az adatok olvasása
-            auto e = receiveData(*p);
-
-            // R: optional konvertálása errorrá
-            // error while reading from serial
-            if (e)
-                return std::unexpected(e.value());
-        } else // invalid data, return error
-            // TODO: drop data until next SOF
-            return std::unexpected(p.error());
-    }
+	auto m = parsedMessages.front();
+	parsedMessages.pop();
+	return m;
 }
 
 void UARTHandler::sendSpeedCommand(float x, float y, float w) {
@@ -186,24 +212,24 @@ size_t unescapeBuffer(std::span<std::byte> buf) {
 
         new_size++;
     }
-
     return new_size;
 }
 
 std::optional<std::string> UARTHandler::receiveData(std::optional<size_t> min_count) {
-	// R: kapacitásra / min_count-ra kiegészíti
+	// TODO ha az előző beolvasásnak a vége egy UART_ESC volt, akkor nem fog tudni unescapelni rendesen
+	// valszeg megoldható azzal, ha az unescapinget a messageParsing-ba rakjuk bele
 
     size_t offset = read_buffer.size();
-    size_t remaining = read_buffer.capacity() - offset;
 
-    // have at least min_count remaining
-    if (min_count && remaining < *min_count) {
-        remaining = *min_count;
-    }
+    // Half of the buffer is reserved for reading in data
+    // The other half is reserved for unescaping the read-in data
+    size_t remaining = (READ_BUFFER_MAX_LEN / 2) - offset; // remaining space for reading in data
 
-
-    // R: resize az, hogy elemeket is rak be oda
-    // hogy a read tudjon bele olvasni
+    // TODO anticipációs valami, hogy visszaadja valamiben a parsing, hogy menny byte kell még az üzenet végéig
+    // min count is no longer used, the function is only called for null_opt
+    // if (min_count && remaining < *min_count) {
+    //     remaining = *min_count;
+    // }
 
     // set size to fit new data
     read_buffer.resize(offset + remaining);
@@ -217,103 +243,185 @@ std::optional<std::string> UARTHandler::receiveData(std::optional<size_t> min_co
     if (len < 0)
         return std::string(std::strerror(errno));
 
-    // unescape to make parsing easier
-    size_t new_size = unescapeBuffer(std::span(read_buffer).subspan(offset));
+    // Note on read_buffer len and unescapeing:
+    // When reading into read buffer, the receiveData() function tries to fill it to 64 bites.
+    // This can generate up to 128 bytes when fully unescaped, but because it only tries to fill it to 64,
+    // this means that 32 escaped bytes can fill that space so this approach can't read messages longer than 32 bytes.
+    read_buffer.resize(offset + len);
 
-    read_buffer.resize(new_size);
+    // unescape to make parsing easier
+    size_t unescaped_size = unescapeBuffer(std::span(read_buffer).subspan(offset));
+
+    // the data was unescaped last pass to the point off the offset
+    // resize the buffer to contain the unescaped size
+    read_buffer.resize(offset + unescaped_size);
 
     return {};
 }
 
-// R: gondolom frame-ek parsolása, magyarul a bufferben lévő üzenetek olvasása
-std::expected<size_t, std::string> UARTHandler::parseFrames() {
-    auto it = read_buffer.begin();
 
+// parse data from read_buffer to parsedMessages()
+// the processed bytes get removed from the read_buffer, and moved forward
+std::expected<size_t, std::string> UARTHandler::parseFrames() {
+	while (true) {
+		auto ret = parseSingleFrame();
+
+		if(!ret.has_value()){
+			// printf("%s\n", ret.error().c_str());
+			return std::unexpected(ret.error());
+		}
+	}
+
+    return -1;
+}
+
+// Parsing based on https://github.com/legokor/DORA-Nucleo-firmware/blob/feature%2Fjetson_comm/TestUtils%2Fpackets.md
+// when this function is called, it's assumed that the read_buffer starts with UART_SOF, and the characters are escaped
+// after this function finishes, the read_buffer's start will be the next frame's UART_SOF
+//
+// Returns 100 if a message was pushed to parsedMessages. This should be replaced by a better return type
+std::expected<size_t, std::string> UARTHandler::parseSingleFrame(){
+	// printf("In parseSingleFrame\n");
+	// printreadbuffer(read_buffer);
     // Frame felépítése:
     // SOF, type, [ha request/reply typus, akkor sequence number], <data> ... ,  checksum, EOF
     // type lehet request, reply, stream
 
-    // R: függvény, ami ellenőrzi, hogy van-e még annyi byte hátra
-    auto require_bytes = [&](size_t n) { return read_buffer.end() - it <= n; };
 
-    // R: ennek a sizeof-nak nincs értelme, mindig 3 lesz
-    // gondolom olvashatóbb?
-    //
-    // R: feltételezzük, hogy a buffer új frame-nél kezdődik
-    while (require_bytes(sizeof(UART_SOF) + sizeof(std::byte) + sizeof(UART_EOF))) {
-        if (*it++ != UART_SOF)
-            return std::unexpected("Frame doesn't start with SOF");
+	auto it = read_buffer.begin();
 
-        std::byte frame_type = *it++;
+    // lamdba function, returns true if there are at least n bytes remaining from the buffer
+    auto require_bytes = [&](size_t n) {
+    	// printf("remaining %d, needed: %d\n OK: %s", read_buffer.end()-it, n, read_buffer.end() - it >= n ? "ok" : "WARNINGNWARNINGNWARNINGNWARNINGNWARNINGNWARNINGNWARNINGNWARNINGNWARNINGNWARNINGN");
+	     // if(read_buffer.end() - it == 0 & n == 2){
+	     // exit(0);
+	     // }
+    	return read_buffer.end() - it >= n;
+    };
 
-        FrameCategory frame_category = (FrameCategory) (frame_type & FRAME_CATEGORY_MASK);
-        uint8_t frame_type_id = (uint8_t) (frame_type & FRAME_TYPE_ID_MASK);
+    // cuts off bytes alread read off the read_buffer's end with an offset
+    // the function is unchecked, so it can cause errors if offset is incorrect
+    auto cut_buffer = [&](int offset = 0){
+    	// printf("Starting cut\n");
+    	// printreadbuffer(read_buffer);
 
-        switch (frame_category) {
-            case FrameCategory::Reply: {
-                std::byte mseq;
-                // HIBA szerintem, + 1 kéne az EOF-nek
-                // mert amúgy ezeken mindig átmegy
-                //
-                // Ha jól értem az üzenet SOF, type, [ebben az esetben egy mseq], EOS
-                // Ebben az esetben átjött SOF és type, de már EOS miatt require_bytes()-oztunk eleget
-                if (!require_bytes(sizeof(mseq)))
-                    return sizeof(mseq);
+    	// printf("Cut");
+    	size_t remaining_size = read_buffer.end() - (it + offset);
+    	std::memmove(read_buffer.data(), &*it + offset, remaining_size);
+    	read_buffer.resize(remaining_size);
 
-                mseq = *it++;
+    	// printreadbuffer(read_buffer);
+    };
 
-                // TODO: handle replies
-                switch ((RequestFrameTypeID) frame_type_id) {
-                    case RequestFrameTypeID::SetSpeed: break;
-                    case RequestFrameTypeID::SetSettings: break;
-                }
+    char checksum = 0;
 
-                break;
-            }
-
-            case FrameCategory::Stream: {
-                switch ((StreamFrameTypeID) frame_type_id) {
-                    case StreamFrameTypeID::Speed:
-                        SpeedData spd;
-
-                        if (!require_bytes(sizeof(spd)))
-                            return sizeof(spd);
-
-                        std::memcpy(&spd, &*it, sizeof(spd));
-                        it += sizeof(spd);
-                        break;
-
-                    case StreamFrameTypeID::Status:
-                        RobotStatus stat;
-
-                        if (!require_bytes(sizeof(stat)))
-                            return sizeof(stat);
-
-                        // TODO: more type safe solution...
-                        std::memcpy(&stat, &*it, sizeof(stat));
-                        it += sizeof(stat);
-                        break;
-                }
-
-                break;
-            }
-
-            case FrameCategory::Request: return std::unexpected("Nucleo sent request???");
-            default: return std::unexpected("Invalid frame category");
-        }
-
-        // TODO: checksum
-        uint8_t checksum;
-
-        if (!require_bytes(sizeof(UART_EOF) + checksum))
-            return sizeof(UART_EOF);
-
-        if (*it++ != UART_EOF)
-            return std::unexpected("Frame doesn't end with EOF");
+    // UART_SOF and frame type
+    if(!require_bytes(2)){
+   		return std::unexpected("Not enough data from UART for parsing a single message");
     }
 
-    return sizeof(UART_SOF) + sizeof(std::byte) + sizeof(UART_EOF);
+
+    if(*it++ != UART_SOF){
+    	// no need to check UART_ESC, because other EOF characters are replaced by (ESC, id) bytes
+
+     	// read in until EOF is read, then cut it do discard whole message
+      	// hope this works
+
+    	while (it < read_buffer.end()-1 && *it++!= UART_EOF){};
+     	cut_buffer();
+
+      	return std::unexpected("Frame doesn't start with SOF, read_buffer cut to next SOF");
+    }
+
+    std::byte frame_type = *it++;
+    checksum += (char)frame_type;
+
+    FrameCategory frame_category = (FrameCategory) (frame_type & FRAME_CATEGORY_MASK);
+    uint8_t frame_type_id = (uint8_t) (frame_type & FRAME_TYPE_ID_MASK);
+    switch (frame_category) {
+
+    case FrameCategory::Request:
+    // cut off unexpected frame
+    cut_buffer();
+   	return std::unexpected("Nucleo shouldn't send request");
+
+    case FrameCategory::Reply:
+
+    // cut off the SOF message, so the message is discarded next parseSingleFrame is called
+    cut_buffer();
+   	return std::unexpected("Reply frames are not implemented, get the parsing of these messages from the old file");
+
+    // TODO checksumba beletartozik az unescape?
+
+    case FrameCategory::Stream:
+    	// if stream, use the rest of the frame_type byte to figure out what kind of message it is
+     	switch ((StreamFrameTypeID) frame_type_id){
+      		case StreamFrameTypeID::Speed:{
+				SpeedData spd;
+
+        		// data + checksum + EOF
+		    	if(!require_bytes(sizeof(spd) + sizeof(std::byte) + sizeof(UART_EOF))){
+		    		return std::unexpected("Half finished stream message");
+		     	}
+
+
+	            std::memcpy(&spd, &*it, sizeof(spd));
+				// printf("%d", sizeof(spd));
+	            it += sizeof(spd);
+
+	            // checksum, discarded
+	            std::byte checksum_byte = *it++;
+	            std::byte eof_byte = *it++;
+
+
+				if(eof_byte != UART_EOF){
+					// cut the message, so the next one is OK
+					cut_buffer();
+					return std::unexpected("Speed message is not closed with EOF");
+				}
+
+            	parsedMessages.push(spd);
+             	// printf("Pushed speed message: ");
+				// printf("x: %f, y: %f, w: %f\n", spd.x, spd.y, spd.w);
+             	cut_buffer();
+              	return 100;
+      		}
+
+           	case StreamFrameTypeID::Status:{
+	            RobotStatus stat;
+
+                // data + checksum + EOF
+	            if (!require_bytes(sizeof(stat) + sizeof(std::byte) + sizeof(UART_EOF)))
+	                return sizeof(stat);
+
+	            std::memcpy(&stat, &*it, sizeof(stat));
+	            it += sizeof(stat);
+	            std::byte checksum_byte = *it++;
+	            std::byte eof_byte = *it++;
+				if(eof_byte != UART_EOF){
+					// lehet ide kéne egy cut, hogy azért menjen
+					cut_buffer();
+					return std::unexpected("Status message is not closed with EOF");
+				}
+            	parsedMessages.push(stat);
+             	cut_buffer();
+             	return 100;
+            }
+            default:
+	            // cut off undiagnosable data?
+	            cut_buffer();
+      	}
+
+    default:
+    // cut off undiagnosable data
+    cut_buffer();
+    return std::unexpected(std::format("Couldn't identify frame category from byte {:08b}", std::to_integer<uint8_t>(frame_type)));
+      break;
+    }
+
+    return std::unexpected("Control flow should not reach this point. (A switch statement before this return has returns in all it's branches.)");
 }
+
 
 UARTHandler::~UARTHandler() {
     close(serial_port);
