@@ -1,79 +1,81 @@
-# dora Docker
-## spaces at the end of lines for appeasing the lsp gods
+ARG FROM_IMAGE=ros:kilted
+ARG OVERLAY_WS=/opt/ros/overlay_ws
 
-FROM ros:kilted AS base
+# multi-stage for caching
+FROM $FROM_IMAGE AS cacher
+ARG OVERLAY_WS
 
-SHELL ["/bin/bash", "-c"]
+# overwrite defaults to persist minimal cache
+RUN rosdep update --rosdistro $ROS_DISTRO && \
+    cat <<EOF > /etc/apt/apt.conf.d/docker-clean && apt-get update
+APT::Install-Recommends "false";
+APT::Install-Suggests "false";
+EOF
 
-## update and install packages
-RUN apt-get update && \
-    apt-get upgrade -y && \
-\
-    apt-get install -y \
-        ranger neovim curl btop tree unzip python3-pip \
-\
-        ros-dev-tools \
-        ros-${ROS_DISTRO}-xacro \
-        ros-${ROS_DISTRO}-joint-state-publisher \
-        # rplidar package is not maintained :/ \
-        # ros-${ROS_DISTRO}-rplidar-ros \
-\
-    # clean up filesystem \
-    && rm -rf /var/lib/apt/lists/*
+# clone overlay source
+WORKDIR $OVERLAY_WS/src
+RUN cat <<EOF | vcs import .
+repositories:
+  legokor/dora-ros:
+    type: git
+    url: https://github.com/legokor/dora-ros.git
+    version: master
+EOF
 
-# make our lives easier
-RUN echo \
-    $'export EDITOR=nvim\n' \
-    $'alias py=python3\n' \
-    $'alias c=clear\n' \
-        >> /root/.bashrc
+# derive build/exec dependencies
+RUN bash -e <<'EOF'
+declare -A types=(
+  [exec]="--dependency-types=exec"
+  [build]="")
+for type in "${!types[@]}"; do
+  rosdep install -y \
+    --from-paths src \
+    --ignore-src \
+    --reinstall \
+    --simulate \
+    ${types[$type]} \
+    | grep 'apt-get install' \
+    | awk '{gsub(/'\''/,"",$4); print $4}' \
+    | sort -u > /tmp/${type}_debs.txt
+done
+EOF
 
-# timezones
-RUN echo "Europe/Budapest" > /etc/timezone
-RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
+# multi-stage for building
+FROM $FROM_IMAGE AS builder
+ARG OVERLAY_WS
 
-# setup ros environment in shell
-RUN echo 'source /root/dora-ros/ros2_ws/src/install/setup.bash' >> /root/.bashrc
+# install build dependencies
+COPY --from=cacher /tmp/build_debs.txt /tmp/build_debs.txt
+RUN --mount=type=cache,target=/etc/apt/apt.conf.d,from=cacher,source=/etc/apt/apt.conf.d \
+    --mount=type=cache,target=/var/lib/apt/lists,from=cacher,source=/var/lib/apt/lists \
+    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    < /tmp/build_debs.txt xargs apt-get install -y
 
-# ros copy workspace
-RUN cd /root/ && git clone --depth=1 https://github.com/legokor/dora-ros.git
+# build overlay source
+WORKDIR $OVERLAY_WS
+COPY --from=cacher $OVERLAY_WS/src ./src
+RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
+    colcon build \
+      --mixin release
 
-# RPLIDAR
-RUN cd /root/dora-ros/ros2_ws/src/ && \
-    git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git
+# multi-stage for running
+FROM $FROM_IMAGE-ros-core AS runner
+ARG OVERLAY_WS
 
-RUN source /root/dora-ros/scripts/build.sh
+# install exec dependencies
+COPY --from=cacher /tmp/exec_debs.txt /tmp/exec_debs.txt
+RUN --mount=type=cache,target=/etc/apt/apt.conf.d,from=cacher,source=/etc/apt/apt.conf.d \
+    --mount=type=cache,target=/var/lib/apt/lists,from=cacher,source=/var/lib/apt/lists \
+    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    < /tmp/exec_debs.txt xargs apt-get install -y
 
-# build if running in CI, run on container start
-CMD ["/bin/bash", "-l", "/root/dora-ros/scripts/${__DORA_CI_ACTION:-run}.sh"]
+# setup overlay install
+ENV OVERLAY_WS=$OVERLAY_WS
+COPY --from=builder $OVERLAY_WS/install $OVERLAY_WS/install
+RUN sed --in-place --expression \
+      '$isource "$OVERLAY_WS/install/setup.bash"' \
+      /ros_entrypoint.sh
 
-# rviz multistage
-FROM base AS rviz
-
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y ros-${ROS_DISTRO}-rviz2 && \
-    rm -rf /var/lib/apt/lists/*
-
-# start rviz on container start
-CMD ["/bin/bash", "-lc", "rviz2"]
-
-FROM rviz AS dev
-
-# we remove neovim because we need the newest version for development
-RUN apt-get remove -y neovim && \
-    apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y bash-completion luarocks ripgrep clangd && \
-    rm -rf /var/lib/apt/lists/*
-
-# install newest neovim appimage from github releases
-RUN cd /tmp && \
-    curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage && \
-    chmod u+x nvim-linux-x86_64.appimage && \
-    ./nvim-linux-x86_64.appimage --appimage-extract && \
-    mv squashfs-root /nvim-squashfs-root && \
-    ln -s /nvim-squashfs-root/AppRun /usr/bin/nvim
-
-RUN cd /root/dora-ros/ && git remote set-url origin git@github.com:legokor/dora-ros.git
+# run launch file
+CMD ["/ros_entrypoint.sh", "ros2", "launch", "controller", "launch_dora.xml"]
 
