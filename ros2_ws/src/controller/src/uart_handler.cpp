@@ -88,7 +88,7 @@ UARTHandler::UARTHandler(const std::string& port, uint32_t baud_rate) {
 	// CHANGE: átlépem az uart port konfigurálását
 
 	// R: Serial port megnyitása
-    // serial_port = open(port.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
+    serial_port = open(port.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
 
     // R: Itt hiba lesz, mert az én gépemen nincs UART port, de megoldom
     if (serial_port == -1) {
@@ -96,7 +96,7 @@ UARTHandler::UARTHandler(const std::string& port, uint32_t baud_rate) {
         exit(1);
     }
 
-    // configure_serial_port(serial_port, baud_rate);
+    configure_serial_port(serial_port, baud_rate);
 
     // reserve 128 and have size 64
     // reserving twice the length because unescaping can double the length of the vector

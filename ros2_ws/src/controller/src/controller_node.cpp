@@ -10,13 +10,11 @@ using Twist = geometry_msgs::msg::Twist;
 using namespace dora;
 
 ControllerNode::ControllerNode() : Node("uart_handler_node"), uart("/dev/ttyUSB1", B115200) {
-
-	velocity_subscriber = create_subscription<Twist>("cmd_vel", 10, [this](Twist::SharedPtr t) { sendTwist(t); });
+    velocity_subscriber = create_subscription<Twist>("cmd_vel", 10, [this](Twist::SharedPtr t) { sendTwist(t); });
     imu_publisher = create_publisher<Twist>("odom", 10);
 
     io_thread = std::thread([this]() {
         while (io_thread_running) {
-        
             std::expected<ReceivedMessage, std::string> msg = uart.receiveMessage();
 
             if (msg)
