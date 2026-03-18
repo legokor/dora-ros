@@ -19,7 +19,7 @@ include_directories(res)
 
 # Create the executable
 add_executable(${CMAKE_PROJECT_NAME} src/controller_node.cpp src/main.cpp
-                                     src/uart_handler.cpp)
+                                     src/uart_handler.cpp src/odometry_node.cpp)
 
 # Link against necessary libraries
 ament_target_dependencies(${CMAKE_PROJECT_NAME}
