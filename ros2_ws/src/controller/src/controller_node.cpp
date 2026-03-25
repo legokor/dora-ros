@@ -6,6 +6,7 @@
 #include <variant>
 
 using Twist = geometry_msgs::msg::Twist;
+using TwistStamped = geometry_msgs::msg::TwistStamped;
 
 using namespace dora;
 
@@ -13,7 +14,7 @@ ControllerNode::ControllerNode() : Node("uart_handler_node"), uart("/dev/ttyUSB1
 
     // Initialising publishers and subscribers
     velocity_subscriber = create_subscription<Twist>("cmd_vel", 10, [this](Twist::SharedPtr t) { sendTwist(t); });
-    twist_publisher = create_publisher<Twist>("encoder_speed", 10);
+    twist_publisher = create_publisher<TwistStamped>("encoder_speed", 10);
     
     // Starting IO thread
     io_thread = std::thread([this]() {
@@ -37,10 +38,12 @@ void ControllerNode::sendTwist(const Twist::SharedPtr& msg) {
 void ControllerNode::publishMeasure(const SpeedData& msg) {
     auto [x, y, th] = msg;
 
-    auto newmsg = Twist();
-    newmsg.linear.x = x;
-    newmsg.linear.y = y;
-    newmsg.angular.z = th;
+    auto newmsg = TwistStamped();
+    newmsg.twist.linear.x = x;
+    newmsg.twist.linear.y = y;
+    newmsg.twist.angular.z = th;
+    
+    newmsg.header.stamp = this->get_clock()->now();;
 
     twist_publisher->publish(newmsg);
 }

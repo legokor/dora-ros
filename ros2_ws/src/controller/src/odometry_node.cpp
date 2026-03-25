@@ -3,12 +3,12 @@
 #include <string>
 
 using namespace dora;
-using Twist = geometry_msgs::msg::Twist;
+using TwistStamped = geometry_msgs::msg::TwistStamped;
 
 OdometryNode::OdometryNode() : Node("odometry_node") {
     tf_broadcaster = std::make_shared<tf2_ros::TransformBroadcaster>(*this);
     odom_publisher = create_publisher<nav_msgs::msg::Odometry>("odom", 10);
-    speed_subscriber = create_subscription<Twist>("encoder_speed", 10, [this](Twist::SharedPtr msg) {odomUpdate(msg);});
+    speed_subscriber = create_subscription<TwistStamped>("encoder_speed", 10, [this](TwistStamped::SharedPtr msg) {odomUpdate(msg);});
 
     // Starting time measurement
     last_time = this->get_clock()->now();
@@ -46,12 +46,12 @@ void OdometryNode::sendTransform(const rclcpp::Time& current_time) {
         RCLCPP_INFO(get_logger(), ss.str().c_str());
 }
 
-void OdometryNode::sendOdometry(const rclcpp::Time& current_time, const Twist::SharedPtr& speedData) {
+void OdometryNode::sendOdometry(const TwistStamped::SharedPtr& speedData) {
         // Initializing message
         nav_msgs::msg::Odometry msg;
 
         // Setting header (Time is also important)
-        msg.header.stamp = current_time;
+        msg.header.stamp = speedData->header.stamp;
         msg.header.frame_id = "odom";
         msg.child_frame_id = "base_footprint";
 
@@ -66,11 +66,28 @@ void OdometryNode::sendOdometry(const rclcpp::Time& current_time, const Twist::S
         msg.pose.pose.orientation = tf2::toMsg(q);
 
         // Velocity data
-        msg.twist.twist.linear.x = speedData->linear.x;
-        msg.twist.twist.linear.y = speedData->linear.y;
-        msg.twist.twist.angular.z = speedData->angular.z;
+        msg.twist.twist.linear.x = speedData->twist.linear.x;
+        msg.twist.twist.linear.y = speedData->twist.linear.y;
+        msg.twist.twist.angular.z = speedData->twist.angular.z;
 
-        // TODO: Covarience matrix if the data is noisy and Dora doesn't move smoothly
+        // TODO: Calculate proper covariance matrix
+        msg.pose.covariance = {
+            0.03, 0.0,  0.0,  0.0,  0.0,  0.0,  // X 
+            0.0,  0.03, 0.0,  0.0,  0.0,  0.0,  // Y
+            0.0,  0.0,  1e-5, 0.0,  0.0,  0.0,  // Z
+            0.0,  0.0,  0.0,  1e-5, 0.0,  0.0,  // Roll
+            0.0,  0.0,  0.0,  0.0,  1e-5, 0.0,  // Pitch
+            0.0,  0.0,  0.0,  0.0,  0.0,  0.03  // Yaw
+        };
+
+        msg.twist.covariance = {
+            0.03, 0.0,  0.0,  0.0,  0.0,  0.0,  // X 
+            0.0,  0.03, 0.0,  0.0,  0.0,  0.0,  // Y
+            0.0,  0.0,  1e-5, 0.0,  0.0,  0.0,  // Z
+            0.0,  0.0,  0.0,  1e-5, 0.0,  0.0,  // Roll
+            0.0,  0.0,  0.0,  0.0,  1e-5, 0.0,  // Pitch
+            0.0,  0.0,  0.0,  0.0,  0.0,  0.03  // Yaw
+        };
         
         // Publishing message
         odom_publisher->publish(msg);
@@ -79,20 +96,19 @@ void OdometryNode::sendOdometry(const rclcpp::Time& current_time, const Twist::S
         std::stringstream ss;
         ss << "Odometry:\n" <<
             "- Pose: " << x_total << " ; " << y_total << " ; " << th_total << "\n" <<
-            "- Velocity: " << speedData->linear.x << " ; " << speedData->linear.y << " ; " << speedData->angular.z << "\n";
+            "- Velocity: " << speedData->twist.linear.x << " ; " << speedData->twist.linear.y << " ; " << speedData->twist.angular.z << "\n";
         RCLCPP_INFO(get_logger(), ss.str().c_str());
 }
 
-void OdometryNode::odomUpdate(const Twist::SharedPtr& speedData) {
-
+void OdometryNode::odomUpdate(const TwistStamped::SharedPtr& speedData) {
     // Getting the elapsed time from the last measurement
-    rclcpp::Time current_time = this->get_clock()->now();
+    rclcpp::Time current_time = speedData->header.stamp;
     double delta_time = (current_time - last_time).seconds();
 
     // Extracting speed data
-    double vx = speedData->linear.x;
-    double vy = speedData->linear.y;
-    double vth = speedData->angular.z;
+    double vx = speedData->twist.linear.x;
+    double vy = speedData->twist.linear.y;
+    double vth = speedData->twist.angular.z;
 
     // Coordinate transform
     double delta_th = vth * delta_time;
@@ -106,7 +122,7 @@ void OdometryNode::odomUpdate(const Twist::SharedPtr& speedData) {
 
     // Sending data:
     sendTransform(current_time);
-    sendOdometry(current_time, speedData);
+    sendOdometry(speedData);
 
     // Setting time:
     last_time = current_time;

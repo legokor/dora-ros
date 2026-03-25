@@ -6,6 +6,7 @@
 #include "rclcpp/node.hpp"
 
 #include "geometry_msgs/msg/twist.hpp"
+#include "geometry_msgs/msg/twist_stamped.hpp"
 
 #include <thread>
 #include <atomic>
@@ -25,7 +26,7 @@ private:
     std::thread io_thread;
 
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr velocity_subscriber;
-    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr twist_publisher;
+    rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr twist_publisher;
 
     void sendTwist(const geometry_msgs::msg::Twist::SharedPtr& msg);
     void publishMeasure(const SpeedData& msg);

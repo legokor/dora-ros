@@ -7,6 +7,7 @@
 
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 #include "geometry_msgs/msg/transform_stamped.hpp"
+#include "geometry_msgs/msg/twist_stamped.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 
@@ -28,13 +29,13 @@ namespace dora {
         rclcpp::Time last_time;
 
         // Communication
-        rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr speed_subscriber;
+        rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr speed_subscriber;
         rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_publisher;
         std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster;
 
         void sendTransform(const rclcpp::Time& current_time);
-        void sendOdometry(const rclcpp::Time& current_time, const geometry_msgs::msg::Twist::SharedPtr& speedData);
-        void odomUpdate(const geometry_msgs::msg::Twist::SharedPtr& speedData);
+        void sendOdometry(const geometry_msgs::msg::TwistStamped::SharedPtr& speedData);
+        void odomUpdate(const geometry_msgs::msg::TwistStamped::SharedPtr& speedData);
 };
 
 }
