@@ -2,21 +2,21 @@
 <launch>
   <node pkg="controller" exec="controller" name="controller"/>
 
-  <let name="urdf_file" value="$(find-pkg-share controller)/res/dora.urdf" />
+  <let name="xacro_file" value="$(find-pkg-share controller)/res/dora.xacro" />
   <let name="config_file" value="$(find-pkg-share controller)/res/dora_config.rviz" />
-  <let name="urdf" value="$(command 'xacro $(var urdf_file)')" />
+  <let name="urdf" value="$(command 'xacro $(var xacro_file)')" />
 
   <node pkg="joint_state_publisher_gui" exec="joint_state_publisher_gui"
   name='joint_state_publisher_gui'>
   </node>
-<!--
+
   <node pkg="joint_state_publisher" exec='joint_state_publisher'
     name='joint_state_publisher'>
 
     <param name="output" value="screen" />
     <param name="robot_description" value="$(var urdf)" />
   </node>
--->
+
   <node pkg="robot_state_publisher" exec='robot_state_publisher'
     name='robot_state_publisher'>
 

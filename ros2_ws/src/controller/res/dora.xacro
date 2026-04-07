@@ -1,0 +1,240 @@
+<?xml version="1.0"?>
+<robot name="dora" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Original body height = 0.103. Changed due to STL height being smaller than actual-->
+    <xacro:property name="body_height" value="0.090" />
+    <xacro:property name="body_to_floor" value="0.012" />
+
+    <xacro:property name="axle_to_center_dist" value="0.180" />
+    <xacro:property name="wheel_axle_length" value="0.025" />
+    <xacro:property name="wheel_diameter" value="0.056" />
+    <xacro:property name="wheel_width" value="0.023" />
+
+    <xacro:property name="lidar_distance" value="0.04" />
+    <xacro:property name="lidar_height" value="0.025" />
+    <xacro:property name="lidar_width" value="0.075" />
+
+    <xacro:property name="lidar_rod_to_center_dist" value="0.030" />
+    <xacro:property name="lidar_rod_height" value="0.035" />
+    <xacro:property name="lidar_rod_size" value="${lidar_rod_height} 0.006 0.006" />
+
+    <xacro:property name="wall_to_center_dist" value="0.115" />
+    <xacro:property name="wall_size" value="0.090 0.270 0.003" />
+
+    <xacro:property name="camera_to_center_dist" value="0.090" />
+    <xacro:property name="camera_dist_between" value="0.060" />
+    <xacro:property name="camera_elevation" value="0.010" />
+    <xacro:property name="camera_size" value="0.025 0.100 0.075" />
+
+    <xacro:property name="mesh_path" value="package://controller/res/dora_vaz.stl" />
+
+    <!-- TODO: scale down mesh in stl -->
+    <xacro:property name="mesh_scale" value="0.001 0.001 0.001" />
+
+
+    <!-- Colors and Materials -->
+    <material name="black">
+        <color rgba="0 0 0 1" />
+    </material>
+
+    <material name="wood">
+        <color rgba="0.96 0.73 0.53 1" />
+    </material>
+
+    <material name="metal">
+        <color rgba="0.4 0.4 0.4 1" />
+    </material>
+
+    <material name="red">
+        <color rgba="0.9 0.1 0.1 1" />
+    </material>
+
+
+    <!-- Wall -->
+    <xacro:macro name="wall" params="idx">
+    <xacro:property name="angle" value='${pi / 2 + 2 * pi * idx / 3}' />
+        <link name="wall_link_${idx}">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <box size="${wall_size}"/>
+                </geometry>
+                <material name="red" />
+            </visual>
+        </link>
+
+        <joint name="wall_joint_${idx}" type="fixed">
+            <parent link="base_link"/>
+            <child link="wall_link_${idx}"/>
+            <origin 
+                xyz="${cos(angle) * wall_to_center_dist} ${sin(angle) * wall_to_center_dist} ${body_to_floor}" 
+                rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" 
+            />
+        </joint>
+    </xacro:macro>
+
+    <xacro:macro name="lidar_rod" params="idx">
+        <xacro:property name="angle" value='${pi / 2 + 2 * pi * idx / 3}' />
+        <!-- No need for new links to contain the rods -->
+            <visual>
+                <origin
+                    xyz="${cos(angle) * lidar_rod_to_center_dist} ${sin(angle) * lidar_rod_to_center_dist} ${-lidar_rod_height/2}"
+                    rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}"
+                />
+
+                <geometry>
+                    <box size="${lidar_rod_size}"/>
+                </geometry>
+
+                <material name="black" />
+            </visual>
+    </xacro:macro>
+
+
+    <!-- Base link -->
+    <link name="base_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 ${pi / 3}" />
+            <geometry>
+                <mesh filename="${mesh_path}" scale="${mesh_scale}" />
+            </geometry>
+
+            <material name="wood"/>
+        </visual>
+
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 ${pi / 3}" />
+            <geometry>
+                <mesh filename="${mesh_path}" scale="${mesh_scale}" />
+            </geometry>
+        </collision>
+    </link>
+
+
+    <!-- Base footprint -->
+    <link name="base_footprint"/>
+
+    <joint name="base_footprint_joint" type="fixed">
+        <parent link="base_footprint"/>
+        <child link="base_link"/>
+        <origin xyz="0 0 ${body_to_floor + body_height / 2}" rpy="0 0 0"/>
+    </joint>
+
+
+    <!-- Lidar link -->
+    <link name="base_lidar">
+        <visual>
+            <origin xyz="0 0 ${lidar_height / 2}"/>
+
+            <geometry>
+                <cylinder length="${lidar_height}" radius="${lidar_width/2}" />
+            </geometry>
+
+            <material name="black"/>
+        </visual>
+
+        <xacro:lidar_rod idx="0" />
+        <xacro:lidar_rod idx="1" />
+        <xacro:lidar_rod idx="2" />
+
+        <collision>
+            <origin xyz="0 0 ${lidar_height / 2}" rpy="0 0 ${pi / 3}" />
+
+            <geometry>
+                <cylinder length="${lidar_height}" radius="${lidar_width/2}" />
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="lidar_joint" type="continuous">
+        <parent link="base_link" />
+        <child link="base_lidar" />
+        <origin xyz="0 0 ${body_to_floor + body_height/2 + lidar_distance}" />
+    </joint>
+
+
+    <!-- Wheel macro -->
+    <xacro:macro name="omniwheel" params="idx">
+        <xacro:property name="angle" value='${pi / 6 + 2 * pi * idx / 3}' />
+        <xacro:property name="wheel_dist"
+            value="${axle_to_center_dist + wheel_axle_length}" />
+
+        <joint name="wheel_joint_${idx}" type="continuous">
+            <parent link="base_link" />
+            <child link="wheel_${idx}" />
+            <origin
+                xyz="${cos(angle) * wheel_dist} ${sin(angle) * wheel_dist} ${-wheel_diameter/2}"
+                rpy="0 0 0"
+            />
+            <axis xyz="${cos(angle)} ${sin(angle)} 0" />
+        </joint>
+
+        <link name="wheel_${idx}">
+            <visual>
+                <origin rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
+
+                <geometry>
+                    <cylinder radius="${wheel_diameter / 2}" length="${wheel_width}" />
+                </geometry>
+
+                <material name="metal" />
+            </visual>
+
+            <collision>
+                <origin rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
+
+                <geometry>
+                    <cylinder radius="${wheel_diameter / 2}" length="${wheel_width}" />
+                </geometry>
+            </collision>
+        </link>
+    </xacro:macro>
+
+
+    <!-- Camera -->
+    <xacro:macro name="camera" params="idx">
+        <xacro:property name="angle" value='${pi / 2 + 2 * pi * idx / 3}' />
+
+        <joint name="camera_joint_${idx}" type="fixed">
+            <parent link="base_link" />
+            <child link="camera_${idx}" />
+            <origin
+                xyz="${cos(angle) * camera_to_center_dist} ${sin(angle) * camera_to_center_dist} ${body_to_floor+camera_elevation}"
+                rpy="0 0 0"
+            />
+            <axis xyz="${cos(angle)} ${sin(angle)} 0" />
+        </joint>
+
+        <link name="camera_${idx}">
+            <visual>
+                <!-- If you need an explanation for this formula, please check out BME VIK's Grafika course -->
+                <origin xyz="${-sin(angle)*camera_dist_between} ${cos(angle)*camera_dist_between} 0" rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
+
+                <geometry>
+                    <box size="${camera_size}"/>
+                </geometry>
+
+                <material name="black" />
+            </visual>
+
+            <visual>
+                <origin xyz="${-sin(angle)*(-camera_dist_between)} ${cos(angle)*(-camera_dist_between)} 0" rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
+
+                <geometry>
+                    <box size="${camera_size}"/>
+                </geometry>
+
+                <material name="black" />
+            </visual>
+        </link>
+
+    </xacro:macro>
+
+    <!-- Calling macros -->
+    <xacro:omniwheel idx="0" />
+    <xacro:omniwheel idx="1" />
+    <xacro:omniwheel idx="2" />
+    <xacro:camera idx="0" />
+    <xacro:wall idx="1" />
+    <xacro:wall idx="2" />
+</robot>

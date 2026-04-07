@@ -1,17 +1,22 @@
 # dora Docker
 ## spaces at the end of lines for appeasing the lsp gods
 
-FROM ros:kilted AS base
+# Important: You must set the FastDDS transport method to UDPv4. That is how I got it to work reliably
+
+FROM ros:humble AS base
 
 SHELL ["/bin/bash", "-c"]
 
-## update and install packages
+# update and install packages
 RUN apt-get update && \
     apt-get upgrade -y && \
 \
     apt-get install -y \
-        ranger neovim curl btop tree unzip python3-pip \
-\
+        # General apps and python
+        software-properties-common nano curl btop tree unzip \
+        python3 python3-pip \
+        # Removed ranger and neovim to boost build time
+        # Ros tools
         ros-dev-tools \
         ros-${ROS_DISTRO}-xacro \
         ros-${ROS_DISTRO}-joint-state-publisher \
@@ -21,9 +26,16 @@ RUN apt-get update && \
     # clean up filesystem \
     && rm -rf /var/lib/apt/lists/*
 
+# add gcc13 because of <expected>
+RUN add-apt-repository ppa:ubuntu-toolchain-r/test  \
+    && apt-get update \
+    && apt-get install -y gcc-13 g++-13
+
+# Setting gcc13 as default
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 100 --slave /usr/bin/g++ g++ /usr/bin/g++-13
+
 # make our lives easier
 RUN echo \
-    $'export EDITOR=nvim\n' \
     $'alias py=python3\n' \
     $'alias c=clear\n' \
         >> /root/.bashrc
@@ -45,7 +57,7 @@ RUN cd /root/dora-ros/ros2_ws/src/ && \
 RUN source /root/dora-ros/scripts/build.sh
 
 # build if running in CI, run on container start
-CMD ["/bin/bash", "-l", "/root/dora-ros/scripts/${__DORA_CI_ACTION:-run}.sh"]
+CMD ["/bin/bash", "-l", "/root/dora-ros/scripts/run.sh"]
 
 # rviz multistage
 FROM base AS rviz

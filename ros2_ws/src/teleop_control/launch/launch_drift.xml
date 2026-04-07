@@ -5,7 +5,7 @@
     </node>
 
     <node pkg="teleop_control" exec="drift_control" name="drift_control" output="screen">
-        <param name="damping" value="2.0"/>
+        <param name="damping" value="4.0"/>
     </node>
 
 </launch>

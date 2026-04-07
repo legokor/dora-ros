@@ -83,7 +83,7 @@ class TeleopKeyPublisher(Node):
 def main(args=None):
     pygame.init()
     screen = pygame.display.set_mode((600, 450))
-    pygame.display.set_caption('Pls adjatok alkohol az enyemet elitam plsssss')
+    pygame.display.set_caption('Kattints a képre és nyomj wasd-ot')
 
     rclpy.init(args=args)
     teleop_node = TeleopKeyPublisher()
