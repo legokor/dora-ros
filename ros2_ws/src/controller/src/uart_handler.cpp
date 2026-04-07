@@ -7,7 +7,7 @@
 #include <format>
 #include <optional>
 #include <termios.h>
-#include <type_traits>
+#include <ostream>
 #include <unistd.h>
 
 #include <cerrno>
@@ -21,6 +21,8 @@
 
 //CHANGE miért nem volt itt eddig a vektor?
 #include <vector>
+
+#define DEBUG_WITHOUT_UART
 
 // CHANGE ezek a függvények
 
@@ -45,9 +47,9 @@ constexpr static std::byte UART_ESC = std::byte(123);
 constexpr static std::byte UART_EOF = std::byte(69);
 
 // maximum length of read buffer
-// 128 should be enough for message lengths of ~10 bytes
-const int READ_BUFFER_MAX_LEN = 128;
-
+// 1024 should be enough for message lengths of ~30 bytes
+const int READ_BUFFER_MAX_LEN = 1024;
+const int TRY_AMOUNT = 100;
 
 // R: saját comment, Remove
 // C: Comment, ami jó ha bennemarad
@@ -85,21 +87,26 @@ static void configure_serial_port(int fd, int speed) {
 }
 
 UARTHandler::UARTHandler(const std::string& port, uint32_t baud_rate) {
-	// CHANGE: átlépem az uart port konfigurálását
 
-	// R: Serial port megnyitása
-    serial_port = open(port.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
+	#ifdef DEBUG_WITHOUT_UART
+		std::cerr << "Dont forget to open port after debugging!" << std::endl;
+	#endif
 
-    // R: Itt hiba lesz, mert az én gépemen nincs UART port, de megoldom
-    if (serial_port == -1) {
-        std::cerr << "Error opening UART port!" << std::endl;
-        exit(1);
-    }
+	#ifndef DEBUG_WITHOUT_UART
+    	serial_port = open(port.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
 
-    configure_serial_port(serial_port, baud_rate);
+	    // R: Itt hiba lesz, mert az én gépemen nincs UART port, de megoldom
+	    if (serial_port == -1) {
+	        std::cerr << "Error opening UART port!" << std::endl;
+	        exit(1);
+	    }
 
-    // reserve 128 and have size 64
+	    configure_serial_port(serial_port, baud_rate);
+	#endif
+
+    // reserve 1024 and have size 512
     // reserving twice the length because unescaping can double the length of the vector
+    // WRONG: Unescaping in this context only makes the message shorter
     read_buffer.reserve(READ_BUFFER_MAX_LEN);
     // resizing is no longer needed
     // read_buffer.resize(READ_BUFFER_MAX_LEN / 2);
@@ -108,31 +115,37 @@ UARTHandler::UARTHandler(const std::string& port, uint32_t baud_rate) {
 
 // This function returns one of the already parsed messages, or reads from UART until a message is parsed, if the parsed messages queue is empty.
 std::expected<ReceivedMessage, std::string> UARTHandler::receiveMessage() {
-	// try to read and parse messages until we get something
 	int tries = 0;
+
+	// try to read and parse messages until we get something
 	while (parsedMessages.empty()) {
-		// too many tries
-		if(tries++ > 10)
-			return std::unexpected("Too many tries trying to receive message");
-
-
-		// félig kész üzeneteknél ez hot loop lesz?
+		std::cerr<<"Parsed messages are empty, reading and parsing..."<<std::endl;
 
 		// try to fill read_buffer from UART
 		auto e = receiveData(std::nullopt);
-		// got some error
-		if (e)
-        	return std::unexpected(*e);
+
+		std::cerr<<"Received data"<<std::endl;
 
 	 	// try parsing frames from read_buffer to parsedMessages
         std::expected<size_t, std::string> p = parseFrames();
 
         // return error from parsing
         if(!p.has_value()){
+        	std::cerr<<"Error parsing message, returning error message."<<std::endl;
+
+        	std::string s = p.error();
        		return std::unexpected(p.error());
         }
-	}
 
+        if(*p == -1){
+       		return std::unexpected("What? (Code escaped while(true) in parseFrames())");
+        }
+
+        // TRY_AMOUNT olvasás-parsolás után sincs új üzenet, hibát jelzünk
+        if(tries++>TRY_AMOUNT){
+	       	return std::unexpected("No new messages on UART");
+        }
+	}
 	auto m = parsedMessages.front();
 	parsedMessages.pop();
 	return m;
@@ -234,10 +247,31 @@ std::optional<std::string> UARTHandler::receiveData(std::optional<size_t> min_co
     // set size to fit new data
     read_buffer.resize(offset + remaining);
 
-    // read data
-    int len = read(serial_port,                           //
-                   (void*) (read_buffer.data() + offset), //
+
+    #ifdef DEBUG_WITHOUT_UART
+    // kiírja honnan kezdődnek a beolvasások
+    // char* buf = new char[1000];
+    // getcwd(buf, 1000);
+    // std::cerr<<buf<<std::endl;
+    static int fd = open("/workspaces/dora-ros/raw_data.bin",O_RDONLY);
+
+    if(fd == -1){
+    	std::cerr<<"Error opening test raw_data.bin"<<std::endl;
+    	exit(0);
+    }
+
+    // Beolvasás a fileból
+    int len = read(fd,
+                   (void*) (read_buffer.data() + offset),
                    (int) remaining);
+    #endif
+
+    #ifndef DEBUG_WITHOUT_UART
+    // read data
+    int len = read(serial_port,
+                   (void*) (read_buffer.data() + offset),
+                   (int) remaining);
+    #endif
 
     // read error
     if (len < 0)
@@ -266,20 +300,35 @@ std::expected<size_t, std::string> UARTHandler::parseFrames() {
 	while (true) {
 		auto ret = parseSingleFrame();
 
+		// unexpected error
 		if(!ret.has_value()){
 			// printf("%s\n", ret.error().c_str());
 			return std::unexpected(ret.error());
+		}
+
+		size_t return_value = *ret;
+
+		// temporary return values for unfinished message
+		if(ret == 101 || ret == 102){
+			std::cerr<<"Parsing read_buffer is stopped, because the last message is not finished:\n\t";
+			if(ret == 101) std::cerr<<"Not enough data from UART for parsing a single message"<<std::endl;
+			if(ret == 102) std::cerr<<"Half finished stream message"<<std::endl;
+
+			return 0;
 		}
 	}
 
     return -1;
 }
-
 // Parsing based on https://github.com/legokor/DORA-Nucleo-firmware/blob/feature%2Fjetson_comm/TestUtils%2Fpackets.md
 // when this function is called, it's assumed that the read_buffer starts with UART_SOF, and the characters are escaped
 // after this function finishes, the read_buffer's start will be the next frame's UART_SOF
 //
 // Returns 100 if a message was pushed to parsedMessages. This should be replaced by a better return type
+//
+// Quick, temporary fixes for unfinished message parsing:
+// Returns 101 if error message would be: Not enough data from UART for parsing a single message
+// Returns 102 if error message would be: Half finished stream message
 std::expected<size_t, std::string> UARTHandler::parseSingleFrame(){
 	// printf("In parseSingleFrame\n");
 	// printreadbuffer(read_buffer);
@@ -317,6 +366,8 @@ std::expected<size_t, std::string> UARTHandler::parseSingleFrame(){
 
     // UART_SOF and frame type
     if(!require_bytes(2)){
+    	return 101;
+    	// cut_buffer();
    		return std::unexpected("Not enough data from UART for parsing a single message");
     }
 
@@ -329,7 +380,6 @@ std::expected<size_t, std::string> UARTHandler::parseSingleFrame(){
 
     	while (it < read_buffer.end()-1 && *it++!= UART_EOF){};
      	cut_buffer();
-
       	return std::unexpected("Frame doesn't start with SOF, read_buffer cut to next SOF");
     }
 
@@ -341,17 +391,17 @@ std::expected<size_t, std::string> UARTHandler::parseSingleFrame(){
     switch (frame_category) {
 
     case FrameCategory::Request:
-    // cut off unexpected frame
-    cut_buffer();
-   	return std::unexpected("Nucleo shouldn't send request");
+	    // cut off unexpected frame
+	    cut_buffer();
+	   	return std::unexpected("Nucleo shouldn't send request");
 
     case FrameCategory::Reply:
 
-    // cut off the SOF message, so the message is discarded next parseSingleFrame is called
-    cut_buffer();
-   	return std::unexpected("Reply frames are not implemented, get the parsing of these messages from the old file");
+	    // cut off the SOF message, so the message is discarded next parseSingleFrame is called
+	    cut_buffer();
+	   	return std::unexpected("Reply frames are not implemented, get the parsing of these messages from the old file");
 
-    // TODO checksumba beletartozik az unescape?
+	    // TODO checksumba beletartozik az unescape?
 
     case FrameCategory::Stream:
     	// if stream, use the rest of the frame_type byte to figure out what kind of message it is
@@ -361,7 +411,8 @@ std::expected<size_t, std::string> UARTHandler::parseSingleFrame(){
 
         		// data + checksum + EOF
 		    	if(!require_bytes(sizeof(spd) + sizeof(std::byte) + sizeof(UART_EOF))){
-		    		return std::unexpected("Half finished stream message");
+					return 102;
+		    		// return std::unexpected("Half finished stream message");
 		     	}
 
 
@@ -375,10 +426,16 @@ std::expected<size_t, std::string> UARTHandler::parseSingleFrame(){
 
 
 				if(eof_byte != UART_EOF){
-					// cut the message, so the next one is OK
+					// dont cut the message, to get the EOF
+
+					// Itt levágom az üzenetet, mert a bemenetem nincs escapelve, és ha itt levágom, eldobom a hibákat.
+					// Dórán nem kéne előjönnie, mert ott rendesen vannak escapelve az üzenetek.
+					// És amúgy is, ha nincs itt EOF, akkor a frame rosszul formált, eldobjuk.
 					cut_buffer();
 					return std::unexpected("Speed message is not closed with EOF");
 				}
+
+				std::cerr<<"Pushed speed message"<<std::endl;
 
             	parsedMessages.push(spd);
              	// printf("Pushed speed message: ");
@@ -400,9 +457,16 @@ std::expected<size_t, std::string> UARTHandler::parseSingleFrame(){
 	            std::byte eof_byte = *it++;
 				if(eof_byte != UART_EOF){
 					// lehet ide kéne egy cut, hogy azért menjen
+
+					// Itt levágom az üzenetet, mert a bemenetem nincs escapelve, és ha itt levágom, eldobom a hibákat.
+					// Dórán nem kéne előjönnie, mert ott rendesen vannak escapelve az üzenetek.
+					// És amúgy is, ha nincs itt EOF, akkor a frame rosszul formált, eldobjuk.
 					cut_buffer();
 					return std::unexpected("Status message is not closed with EOF");
 				}
+
+				std::cerr<<"Pushed status message"<<std::endl;
+
             	parsedMessages.push(stat);
              	cut_buffer();
              	return 100;
