@@ -8,7 +8,7 @@
 #include <string>
 #include <variant>
 
-#define DEBUG_WITHOUT_UART
+// #define DEBUG_WITHOUT_UART
 
 using Twist = geometry_msgs::msg::Twist;
 
@@ -19,22 +19,17 @@ ControllerNode::ControllerNode() : Node("uart_handler_node"), uart("/dev/ttyUSB1
     imu_publisher = create_publisher<Twist>("odom", 10);
 
     std::cerr<<io_thread_running<<std::endl;
-    char* buf = new char[1000];
-    getcwd(buf, 1000);
-    std::cerr<<buf<<std::endl;
+
     io_thread_running = true;
     io_thread = std::thread([this]() {
         while (io_thread_running) {
             std::expected<ReceivedMessage, std::string> msg = uart.receiveMessage();
 
-            static int count = 0;
-            std::cerr<<"Count: "<<count<<std::endl;
             if (msg){
-            	count++;
                 handleReceivedMessage(*msg);
             }
             else{
-            	// if error message is no new message from uart, don't stop WHEN DEBUGGING
+            	// if error message is "no new message from uart", don't stop WHEN DEBUGGING
             	if(strcmp(msg.error().c_str(),"No new messages on UART") == 0){
              		RCLCPP_ERROR(get_logger(), "Stopped receiving messages from UART.");
 
@@ -44,6 +39,7 @@ ControllerNode::ControllerNode() : Node("uart_handler_node"), uart("/dev/ttyUSB1
                  	#endif
              	}else{
 	                RCLCPP_ERROR(get_logger(), "UART read failed: %s", msg.error().c_str());
+					// When debugging, dont stop on error
 					#ifndef DEBUG_WITHOUT_UART
 	                	break;
 					#endif

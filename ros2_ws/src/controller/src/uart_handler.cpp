@@ -22,9 +22,16 @@
 //CHANGE miért nem volt itt eddig a vektor?
 #include <vector>
 
-#define DEBUG_WITHOUT_UART
+// #define DEBUG_WITHOUT_UART
+#define DEBUG_CERR
 
 // CHANGE ezek a függvények
+// wrapper around std::cerr which can be turned on with defining DEBUG_CERR
+void cerrdebug(std::string s){
+	#ifdef DEBUG_CERR
+	std::cerr<<s<<std::endl;
+	#endif
+}
 
 void debugbyte(std::byte b){
 	static int hanyadik = 0;
@@ -115,23 +122,24 @@ UARTHandler::UARTHandler(const std::string& port, uint32_t baud_rate) {
 
 // This function returns one of the already parsed messages, or reads from UART until a message is parsed, if the parsed messages queue is empty.
 std::expected<ReceivedMessage, std::string> UARTHandler::receiveMessage() {
-	int tries = 0;
+	cerrdebug("Started receiveMessage function");
 
+	int tries = 0;
 	// try to read and parse messages until we get something
 	while (parsedMessages.empty()) {
-		std::cerr<<"Parsed messages are empty, reading and parsing..."<<std::endl;
+		cerrdebug("Parsed messages are empty, reading and parsing...");
 
 		// try to fill read_buffer from UART
 		auto e = receiveData(std::nullopt);
 
-		std::cerr<<"Received data"<<std::endl;
+		cerrdebug("Received data, starting parsing...");
 
 	 	// try parsing frames from read_buffer to parsedMessages
         std::expected<size_t, std::string> p = parseFrames();
 
         // return error from parsing
         if(!p.has_value()){
-        	std::cerr<<"Error parsing message, returning error message."<<std::endl;
+	       	cerrdebug("Error parsing message, returning error message.");
 
         	std::string s = p.error();
        		return std::unexpected(p.error());
@@ -146,6 +154,7 @@ std::expected<ReceivedMessage, std::string> UARTHandler::receiveMessage() {
 	       	return std::unexpected("No new messages on UART");
         }
 	}
+	cerrdebug("Returning message");
 	auto m = parsedMessages.front();
 	parsedMessages.pop();
 	return m;
@@ -229,14 +238,13 @@ size_t unescapeBuffer(std::span<std::byte> buf) {
 }
 
 std::optional<std::string> UARTHandler::receiveData(std::optional<size_t> min_count) {
+	cerrdebug("\tReceiving data from UART");
 	// TODO ha az előző beolvasásnak a vége egy UART_ESC volt, akkor nem fog tudni unescapelni rendesen
 	// valszeg megoldható azzal, ha az unescapinget a messageParsing-ba rakjuk bele
 
     size_t offset = read_buffer.size();
 
-    // Half of the buffer is reserved for reading in data
-    // The other half is reserved for unescaping the read-in data
-    size_t remaining = (READ_BUFFER_MAX_LEN / 2) - offset; // remaining space for reading in data
+    size_t remaining = READ_BUFFER_MAX_LEN - offset; // remaining space for reading in data
 
     // TODO anticipációs valami, hogy visszaadja valamiben a parsing, hogy menny byte kell még az üzenet végéig
     // min count is no longer used, the function is only called for null_opt
@@ -273,6 +281,8 @@ std::optional<std::string> UARTHandler::receiveData(std::optional<size_t> min_co
                    (int) remaining);
     #endif
 
+    cerrdebug(std::format("\tRead {} bytes", len));
+
     // read error
     if (len < 0)
         return std::string(std::strerror(errno));
@@ -308,11 +318,11 @@ std::expected<size_t, std::string> UARTHandler::parseFrames() {
 
 		size_t return_value = *ret;
 
-		// temporary return values for unfinished message
+		// temporary return values for unfinished messages
 		if(ret == 101 || ret == 102){
-			std::cerr<<"Parsing read_buffer is stopped, because the last message is not finished:\n\t";
-			if(ret == 101) std::cerr<<"Not enough data from UART for parsing a single message"<<std::endl;
-			if(ret == 102) std::cerr<<"Half finished stream message"<<std::endl;
+			cerrdebug("\tParsing read_buffer is stopped, because the last message is not finished:");
+			if(ret == 101) cerrdebug("\t\tNot enough data from UART for parsing a single message");
+			if(ret == 102) cerrdebug("\t\tHalf finished stream message");
 
 			return 0;
 		}
@@ -330,6 +340,7 @@ std::expected<size_t, std::string> UARTHandler::parseFrames() {
 // Returns 101 if error message would be: Not enough data from UART for parsing a single message
 // Returns 102 if error message would be: Half finished stream message
 std::expected<size_t, std::string> UARTHandler::parseSingleFrame(){
+	cerrdebug("\tStarted parsing a single frame");
 	// printf("In parseSingleFrame\n");
 	// printreadbuffer(read_buffer);
     // Frame felépítése:
@@ -383,6 +394,8 @@ std::expected<size_t, std::string> UARTHandler::parseSingleFrame(){
       	return std::unexpected("Frame doesn't start with SOF, read_buffer cut to next SOF");
     }
 
+    cerrdebug("\tStart of frame found");
+
     std::byte frame_type = *it++;
     checksum += (char)frame_type;
 
@@ -407,6 +420,7 @@ std::expected<size_t, std::string> UARTHandler::parseSingleFrame(){
     	// if stream, use the rest of the frame_type byte to figure out what kind of message it is
      	switch ((StreamFrameTypeID) frame_type_id){
       		case StreamFrameTypeID::Speed:{
+	      		cerrdebug("\t\tStarted parsing speed frame");
 				SpeedData spd;
 
         		// data + checksum + EOF
@@ -435,7 +449,7 @@ std::expected<size_t, std::string> UARTHandler::parseSingleFrame(){
 					return std::unexpected("Speed message is not closed with EOF");
 				}
 
-				std::cerr<<"Pushed speed message"<<std::endl;
+				cerrdebug(std::format("\t\tPushed speed message [x: {}, y: {}, w: {}] to parsedMessages", spd.x, spd.y, spd.w));
 
             	parsedMessages.push(spd);
              	// printf("Pushed speed message: ");
@@ -445,6 +459,7 @@ std::expected<size_t, std::string> UARTHandler::parseSingleFrame(){
       		}
 
            	case StreamFrameTypeID::Status:{
+           		cerrdebug("\t\tStarted parsing status frame");
 	            RobotStatus stat;
 
                 // data + checksum + EOF
@@ -465,7 +480,7 @@ std::expected<size_t, std::string> UARTHandler::parseSingleFrame(){
 					return std::unexpected("Status message is not closed with EOF");
 				}
 
-				std::cerr<<"Pushed status message"<<std::endl;
+				cerrdebug(std::format("\t\tPushed status message [{}] to parsedMessages", stat.voltage));
 
             	parsedMessages.push(stat);
              	cut_buffer();
