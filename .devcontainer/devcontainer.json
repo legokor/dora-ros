@@ -1,0 +1,35 @@
+{
+	"name": "ROS Development (Zed)",
+	"image": "ghcr.io/legokor/dora-ros:latest",
+
+	// "remoteUser": "root",
+
+	// "remoteUser": "andros",
+	// "updateRemoteUserUID": true,
+
+	// "service": "ros2", // Must match your docker-compose.yml service name
+	// "workspaceFolder": "/workspace",
+
+	// "features": {
+	// 	// Optional: Common utilities often needed in ROS
+	// 	"ghcr.io/devcontainers/features/common-utils:1": {
+	// 		"installZsh": true,
+	// 		"username": "rosuser",
+	// 		"upgradePackages": true,
+	// 	},
+	// },
+
+	// "customizations": {
+	// 	"zed": {
+	// 		"user_settings": {
+	// 			"autosave": "on_focus_change",
+	// 			"terminal": {
+	// 				"copy_on_select": true,
+	// 			},
+	// 		},
+	// 	},
+	// },
+
+	// Ensures ROS setup is sourced for the Zed terminal
+	// "postCreateCommand": "echo 'source /opt/ros/$ROS_DISTRO/setup.bash' >> ~/.bashrc && sudo rosdep update",
+}

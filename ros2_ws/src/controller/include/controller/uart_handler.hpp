@@ -38,6 +38,8 @@ enum class RequestFrameTypeID : uint8_t {
     SetSettings = 0b00000010,
 };
 
+// CHANGE ez el volt írva
+// a Speed 0b00000001-nek kéne lennie
 enum class StreamFrameTypeID : uint8_t {
     Speed = 0b00000001,
     Status = 0b00000010,
@@ -52,6 +54,8 @@ public:
 
     std::expected<dora::ReceivedMessage, std::string> receiveMessage();
 
+    // CHANGE: mindent publicra raktam, hogy tudjam nyúlkálni
+
 private:
     int serial_port;
     uint8_t seq;
@@ -65,8 +69,9 @@ private:
     // parses from read_buffer to parsedMessages and returns the estimated amount of bytes to receive for the next
     // message
     std::expected<size_t, std::string> parseFrames();
-
+    std::expected<size_t, std::string> parseSingleFrame();
     void sendFrame(std::byte type, std::span<const std::byte> payload);
+
 };
 
 } // namespace dora
