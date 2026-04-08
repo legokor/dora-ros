@@ -3,7 +3,7 @@
 
 # Important: You must set the FastDDS transport method to UDPv4. That is how I got it to work reliably
 
-FROM ros:humble AS base
+FROM ros:jazzy AS base
 
 SHELL ["/bin/bash", "-c"]
 
@@ -28,12 +28,12 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # add gcc13 because of <expected>
-RUN add-apt-repository ppa:ubuntu-toolchain-r/test  \
-    && apt-get update \
-    && apt-get install -y gcc-13 g++-13
+#RUN add-apt-repository ppa:ubuntu-toolchain-r/test  \
+#    && apt-get update \
+#    && apt-get install -y gcc-13 g++-13
 
 # Setting gcc13 as default
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 100 --slave /usr/bin/g++ g++ /usr/bin/g++-13
+#RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 100 --slave /usr/bin/g++ g++ /usr/bin/g++-13
 
 # make our lives easier
 RUN echo \
@@ -47,9 +47,6 @@ RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
 
 # setup ros environment in shell
 RUN echo 'source /root/dora-ros/ros2_ws/src/install/setup.bash' >> /root/.bashrc
-
-# Initializing rosdep
-RUN rosdep init $$ rosdep install
 
 # ros copy workspace
 RUN cd /root/ && git clone --depth=1 https://github.com/legokor/dora-ros.git
