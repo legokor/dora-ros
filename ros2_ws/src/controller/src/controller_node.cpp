@@ -41,7 +41,7 @@ ControllerNode::ControllerNode() : Node("uart_handler_node"), uart("/dev/ttyUSB1
 	                RCLCPP_ERROR(get_logger(), "UART read failed: %s", msg.error().c_str());
 					// When debugging, dont stop on error
 					#ifndef DEBUG_WITHOUT_UART
-	                	break;
+	                	// break;
 					#endif
               	}
             }
