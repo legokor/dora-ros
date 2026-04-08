@@ -464,7 +464,7 @@ std::expected<size_t, std::string> UARTHandler::parseSingleFrame(){
 
                 // data + checksum + EOF
 	            if (!require_bytes(sizeof(stat) + sizeof(std::byte) + sizeof(UART_EOF)))
-	                return sizeof(stat);
+	                return 102;
 
 	            std::memcpy(&stat, &*it, sizeof(stat));
 	            it += sizeof(stat);
