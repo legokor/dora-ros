@@ -11,6 +11,12 @@
 
     <xacro:property name="lidar_height" value="0.045" />
 
+    <!-- TODO: measure -->
+    <xacro:property name="cam_height" value="0.09" />
+    <xacro:property name="cam_to_center_dist" value="0.105" />
+    <xacro:property name="cam_to_cam_dist" value="0.08" />
+    <xacro:property name="camera_angle" value="${-pi / 6}" />
+
     <!-- TODO: make it work without internet access -->
     <xacro:property name="mesh_path"
         value="https://raw.githubusercontent.com/legokor/dora-ros/refs/heads/master/ros2_ws/src/controller/res/dora_vaz.stl" />
@@ -40,11 +46,36 @@
         </collision>
     </link>
 
-    <link name="base_lidar"></link>
+    <link name="laser"></link>
     <joint name="lidar_joint" type="fixed">
         <parent link="base_link" />
-        <child link="base_lidar" />
+        <child link="laser" />
         <origin xyz="0 0 ${body_to_floor + body_height + lidar_height}" />
+    </joint>
+
+    <link name="cameras_center"></link>
+    <link name="camera1"></link>
+    <link name="camera2"></link>
+
+    <joint name="camera_center_joint" type="fixed">
+        <parent link="base_link" />
+        <child link="cameras_center" />
+        <origin
+            xyz="${cos(camera_angle) * cam_to_center_dist} ${sin(camera_angle) * cam_to_center_dist} ${body_to_floor + cam_height}"
+            rpy="0 0 ${camera_angle}"
+        />
+    </joint>
+
+    <joint name="camera1_joint" type="fixed">
+        <parent link="cameras_center" />
+        <child link="camera1" />
+        <origin xyz="0 ${-cam_to_cam_dist * 0.5} 0" />
+    </joint>
+
+    <joint name="camera2_joint" type="fixed">
+        <parent link="cameras_center" />
+        <child link="camera2" />
+        <origin xyz="0 ${cam_to_cam_dist * 0.5} 0" />
     </joint>
 
     <xacro:macro name="omniwheel" params="idx">
