@@ -17,6 +17,7 @@ RUN apt-get update && \
         python3 python3-pip \
         # Removed ranger and neovim to boost build time
         # Ros tools
+        python3-rosdep \
         ros-dev-tools \
         ros-${ROS_DISTRO}-xacro \
         ros-${ROS_DISTRO}-joint-state-publisher \
@@ -46,6 +47,9 @@ RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
 
 # setup ros environment in shell
 RUN echo 'source /root/dora-ros/ros2_ws/src/install/setup.bash' >> /root/.bashrc
+
+# Initializing rosdep
+RUN rosdep init $$ rosdep install
 
 # ros copy workspace
 RUN cd /root/ && git clone --depth=1 https://github.com/legokor/dora-ros.git

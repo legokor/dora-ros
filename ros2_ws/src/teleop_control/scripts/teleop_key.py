@@ -26,7 +26,7 @@ class TeleopKeyPublisher(Node):
         self.linLimit = (0, 1)
         self.angSpeed = 0.1
         self.angAccel = 0.02
-        self.angLimit = (-math.pi/4, math.pi/4)
+        self.angLimit = (-1, 1)
 
         # Parameter for accelerational input
         parameter_descriptor = ParameterDescriptor(type=ParameterType.PARAMETER_BOOL,

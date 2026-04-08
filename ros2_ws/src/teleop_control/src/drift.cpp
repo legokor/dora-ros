@@ -42,7 +42,7 @@ class DriftNode : public Node {
         double linSpeed = 0;
         double angSpeed = 0;
         double linLimit[2] = {-1.0, 1.0};
-        double angLimit[2] = {-M_PI/3, M_PI/3};
+        double angLimit[2] = {-1.0, 1.0};
 };
 
 int main(int argc, char** argv) {
