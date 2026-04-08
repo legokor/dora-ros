@@ -10,12 +10,16 @@
   <let name="urdf_file" value="$(find-pkg-share controller)/res/dora.urdf" />
   <let name="urdf" value="$(command 'xacro $(var urdf_file)' ignore)" />
 
-  <node pkg="joint_state_publisher" exec='joint_state_publisher' name='joint_state_publisher'>
+  <node pkg="joint_state_publisher" exec='joint_state_publisher'
+    name='joint_state_publisher'>
+
     <param name="output" value="screen" />
     <param name="robot_description" value="$(var urdf)" />
   </node>
 
-  <node pkg="robot_state_publisher" exec='robot_state_publisher' name='robot_state_publisher'>
+  <node pkg="robot_state_publisher" exec='robot_state_publisher'
+    name='robot_state_publisher'>
+
     <param name="output" value="screen" />
     <param name="robot_description" value="$(var urdf)" />
     <param name="tf_prefix" value="dora" />
