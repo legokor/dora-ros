@@ -6,6 +6,7 @@
 
     <node pkg="teleop_control" exec="drift_control" name="drift_control" output="screen">
         <param name="damping" value="4.0"/>
+        <remap from="cmd_vel" to="dora/cmd_vel"/>
     </node>
 
 </launch>
