@@ -22,7 +22,7 @@
 //CHANGE miért nem volt itt eddig a vektor?
 #include <vector>
 
-// #define DEBUG_WITHOUT_UART
+#define DEBUG_WITHOUT_UART
 #define DEBUG_CERR
 
 // CHANGE ezek a függvények
@@ -190,13 +190,23 @@ static std::byte unescape(std::byte b) {
 
 // elméletben ez működik, nem kell vele foglalkozni
 void UARTHandler::sendFrame(std::byte frameType, std::span<const std::byte> payload) {
+	std::cerr<<"In sendFrame() function"<<std::endl;
+	std::cerr<<std::format("Frame type: {:02x}", std::to_integer<unsigned char>(frameType))<<std::endl;
+    std::cerr<<"Payload: ";
+    for(auto b : payload){
+    	std::cerr<<std::format("{:02x}", std::to_integer<unsigned char>(frameType));
+    }
+    std::cerr<<std::endl;
+
     write_buffer.push_back(UART_SOF);
+
 
     uint8_t checksum = 0;
     write_buffer.push_back(std::byte(frameType));
     checksum += (uint8_t) write_buffer.back();
 
     // TODO: does seq really work like this?
+    std::cerr<<std::format("Sequence number: {}", seq)<<std::endl;
     write_buffer.push_back(std::byte(seq++));
     checksum += (uint8_t) write_buffer.back();
 
@@ -214,9 +224,24 @@ void UARTHandler::sendFrame(std::byte frameType, std::span<const std::byte> payl
     write_buffer.push_back(std::byte(checksum));
     write_buffer.push_back(UART_EOF);
 
+    std::cerr<<"--- Complete write buffer ---"<<std::endl;
+    for(auto b : write_buffer){
+    	std::cerr<<std::format("{:02x}", std::to_integer<unsigned char>(frameType));
+    }
+    std::cerr<<std::endl<<"--- Complete write buffer ---"<<std::endl;
+
+    #ifndef DEBUG_WITHOUT_UART
     ssize_t w = write(serial_port, write_buffer.data(), write_buffer.size());
+    #endif
+
+    #ifdef DEBUG_WITHOUT_UART
+    static int write_fd = open("/workspaces/dora-ros/raw_out.bin",O_RDWR);
+
+    #endif
+    ssize_t w = -1;
     if (w == -1) {
         // TODO: error
+        std::cerr<<"PROPER ERROR WRITING TO UART"<<std::endl;
     }
 
     write_buffer.clear();
@@ -261,7 +286,7 @@ std::optional<std::string> UARTHandler::receiveData(std::optional<size_t> min_co
     // char* buf = new char[1000];
     // getcwd(buf, 1000);
     // std::cerr<<buf<<std::endl;
-    static int fd = open("/workspaces/dora-ros/raw_data.bin",O_RDONLY);
+    static int fd = open("/root/dora-ros/raw_data.bin",O_RDONLY);
 
     if(fd == -1){
     	std::cerr<<"Error opening test raw_data.bin"<<std::endl;

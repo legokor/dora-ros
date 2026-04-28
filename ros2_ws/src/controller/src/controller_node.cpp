@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <expected>
+#include <format>
 #include <string>
 #include <variant>
 
@@ -52,6 +53,7 @@ ControllerNode::ControllerNode() : Node("uart_handler_node"), uart("/dev/ttyUSB1
 }
 
 void ControllerNode::sendTwist(const Twist::SharedPtr& msg) {
+	std::cerr<<std::format("Speed message at controller node: ({}, {}, {})", msg->linear.x, msg->linear.y, msg->angular.z)<<std::endl;
     uart.sendSpeedCommand(msg->linear.x, msg->linear.y, msg->angular.z);
 }
 

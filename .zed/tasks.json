@@ -4,7 +4,7 @@
 [
 	{
 		"label": "Build and run",
-		"command": "colcon build --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && source install/setup.bash && ros2 run controller controller",
+		"command": "source /opt/ros/kilted/setup.bash && colcon build --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && source install/setup.bash && ros2 run controller controller",
 		"env": { "foo": "bar" },
 		"use_new_terminal": false,
 		"allow_concurrent_runs": false,

@@ -4,3 +4,5 @@ install/
 
 /ros2_ws/src/rplidar_ros/
 
+# Ez egy 128k-s file, amiben UART teszteléséhez vannak adatok
+raw_data.bin

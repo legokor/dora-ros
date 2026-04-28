@@ -1,6 +1,11 @@
 {
-	"name": "ROS Development (Zed)",
+	"name": "Dora ROS Developement",
+	// Elméletben van egy
 	"image": "ghcr.io/legokor/dora-ros:latest",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/root/dora-ros,type=bind",
+	"workspaceFolder": "/root/dora-ros",
+
+	// "workspaceFolder": "/root/dora-ros/",
 
 	// "remoteUser": "root",
 
