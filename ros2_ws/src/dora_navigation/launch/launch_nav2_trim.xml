@@ -1,0 +1,15 @@
+<launch>
+    <node pkg="rclcpp_components" exec="component_container" name="dora_nav2_container" output="screen"/>
+    <include file="$(find-pkg-share dora_navigation)/launch/slam_launch.py">
+        <arg name="params_file" value="$(find-pkg-share dora_navigation)/config/nav2_params.yaml"/>
+        <arg name="use_composition" value="True"/>
+        <arg name="container_name" value="dora_nav2_container"/>
+    </include>
+    <include file="$(find-pkg-share dora_navigation)/launch/navigation_launch.py">
+        <arg name="params_file" value="$(find-pkg-share dora_navigation)/config/nav2_params.yaml"/>
+        <arg name="use_composition" value="True"/>
+        <arg name="autostart" value="True"/>
+        <arg name="container_name" value="dora_nav2_container"/>
+    </include>
+    <include file="$(find-pkg-share dora_navigation)/launch/rviz_launch.py"/>
+</launch>

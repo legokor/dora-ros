@@ -2,6 +2,7 @@
     <include file="$(find-pkg-share nav2_bringup)/launch/bringup_launch.py">
         <arg name="params_file" value="$(find-pkg-share dora_navigation)/config/nav2_params.yaml"/>
         <arg name="slam" value="True"/>
+        <arg name="use_composition" value="True"/>
     </include>
     <include file="$(find-pkg-share nav2_bringup)/launch/rviz_launch.py"/>
 </launch>
