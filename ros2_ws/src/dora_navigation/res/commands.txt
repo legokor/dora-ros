@@ -1,0 +1,10 @@
+Minden lifecycle command-hoz a parancs:
+ros2 service call /lifecycle_manager_navigation/manage_nodes nav2_msgs/srv/ManageLifecycleNodes "{command: 1}"
+
+Ahol a command értéke lehet:
+Startup: 1
+Shutdown: 2
+Reset: 3 
+Pause: 4
+Resume: 5
+Cleanup: 6
