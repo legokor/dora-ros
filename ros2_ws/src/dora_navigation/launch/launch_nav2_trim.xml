@@ -4,6 +4,7 @@
         <arg name="params_file" value="$(find-pkg-share dora_navigation)/config/nav2_params.yaml"/>
         <arg name="use_composition" value="True"/>
         <arg name="container_name" value="dora_nav2_container"/>
+        <arg name="autostart" value="True"/>
     </include>
     <include file="$(find-pkg-share dora_navigation)/launch/navigation_launch.py">
         <arg name="params_file" value="$(find-pkg-share dora_navigation)/config/nav2_params.yaml"/>
