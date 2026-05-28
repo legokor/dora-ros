@@ -2,11 +2,9 @@
 
 DORA_PRE_RUN_PWD=$PWD
 
-source /root/dora-ros/scripts/build.sh &&
 cd /root/dora-ros/ros2_ws/ &&
 source /root/dora-ros/ros2_ws/src/install/setup.bash &&
-export FASTDDS_BUILTIN_TRANSPORTS=UDPv4
-#ros2 launch controller launch_dora.xml
+ros2 launch controller launch_dora.xml
 
 cd $DORA_PRE_RUN_PWD
 
