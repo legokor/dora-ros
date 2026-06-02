@@ -1,4 +1,4 @@
-name: Build ros container
+name: New build ros container
 
 on:
   push:
