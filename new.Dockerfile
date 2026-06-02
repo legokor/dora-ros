@@ -1,8 +1,7 @@
 # dora Docker
 ## spaces at the end of lines for appeasing the lsp gods
 
-# default argument values
-ARG DORA_CI_ACTION=run
+# old main branch name
 ARG GIT_BRANCH=master
 
 # base sets up ROS environment
@@ -41,11 +40,13 @@ RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
 # at this point, this file does not exist
 RUN echo 'source /root/dora-ros/ros2_ws/src/install/setup.bash' >> /root/.bashrc
 
-# builds the project
 FROM base AS builder
 
-# copy only the active branch
 ARG GIT_BRANCH
+# ros copy workspace
+# RUN cd /root/ && git clone --depth=1 https://github.com/legokor/dora-ros.git
+
+# only copy the active branch
 RUN cd /root/ && git clone --branch ${GIT_BRANCH} --depth=1  https://github.com/legokor/dora-ros.git
 
 # RPLIDAR copy
@@ -56,8 +57,7 @@ RUN cd /root/dora-ros/ros2_ws/src/ && \
 RUN source /root/dora-ros/scripts/build.sh
 
 # build if running in CI, run on container start
-ARG DORA_CI_ACTION
-CMD ["/bin/bash", "-l", "/root/dora-ros/scripts/${DORA_CI_ACTION}.sh"]
+CMD ["/bin/bash", "-l", "/root/dora-ros/scripts/${__DORA_CI_ACTION:-run}.sh"]
 
 # Bare minimum(?) for running the robot
 # This shouldn't include neovim, probably ros-dev-tools, needs to be looked into
@@ -68,40 +68,23 @@ COPY --from=builder /root/dora-ros/scripts/no-build-run.sh /root/dora-ros/script
 # copy the result of building
 COPY --from=builder /root/dora-ros/ros2_ws/src/install /root/dora-ros/ros2_ws/src/install
 
-# in prod, remove the apt list
-# this will be better done in the future (building the prod stage from a base ros image)
-RUN rm -rf /var/lib/apt/lists/*
-
 # run automatically
 CMD ["/bin/bash", "-l", "/root/dora-ros/scripts/no-build-run.sh"]
 
 # rviz multistage
-# base-ből, mert build majd ezeknek a csomagjainak a letöltése után lesz
-# vagy majd a base-be belerakunk minden csomagot? meg kell nézni előtte a new.Dockerfile-os cachelést
-FROM base AS rviz
+FROM builder AS rviz
 
-# Meg lehet spórolni az update és upgrade-et, ha nem removeoljuk a package list-et a base-ben
+# Meg lehet spórolni az update és upgrade-et, ha nem removeoljuk a package liste-t a base-ben
 RUN	apt-get install -y ros-${ROS_DISTRO}-rviz2
 
 # start rviz on container start
 CMD ["/bin/bash", "-lc", "rviz2"]
 
-# IN PROGRESS:
-# lehúzza az egész repot, lebuildeli, és beállítja a github repot
-FROM rviz AS dev
+FROM builder AS dev
 
 # we remove neovim because we need the newest version for development
 RUN apt-get remove -y neovim && \
-	apt-get install -y bash-completion luarocks ripgrep clangd \
-	# dev programs
-	# done in rviz stage
-	# ros-${ROS_DISTRO}-rviz2 \
-	ros-${ROS_DISTRO}-rqt \
-	ros-${ROS_DISTRO}-rqt-common-plugins \
-	# experimental programs
-	ros-${ROS_DISTRO}-navigation2 \
-	ros-${ROS_DISTRO}-nav2-bringup \
-	ros-${ROS_DISTRO}-slam-toolbox
+	apt-get install -y bash-completion luarocks ripgrep clangd
 
 # install newest neovim appimage from github releases
 RUN cd /tmp && \
@@ -111,33 +94,6 @@ RUN cd /tmp && \
 	mv squashfs-root /nvim-squashfs-root && \
 	ln -s /nvim-squashfs-root/AppRun /usr/bin/nvim
 
-# -- BUILD STAGE --
-
-# copy only the active branch
-ARG GIT_BRANCH
-RUN cd /root/ && git clone --branch ${GIT_BRANCH} --depth=1  https://github.com/legokor/dora-ros.git
-
-# RPLIDAR copy
-RUN cd /root/dora-ros/ros2_ws/src/ && \
-		git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git
-
-# build the project
-RUN source /root/dora-ros/scripts/build.sh
-
-# -- BUILD STAGE --
-
-# git elérés része
-# nagyon work in progress, mert autentikáció kell
 RUN cd /root/dora-ros/ \
-	# fix depth=1 and single branch copying
-	&& git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*" \
-	# because of shallow copy, we need to fetch everything
-	&& git fetch --unshallow \
-	&& git remote set-url origin git@github.com:legokor/dora-ros.git
-
-
-# start from the working folder
-WORKDIR /root/dora-ros
-
-# no need to run a command
-CMD []
+	&& git remote set-url origin git@github.com:legokor/dora-ros.git\
+	&& git fetch --unshallow # because of shallow copy, we need to fetch everything

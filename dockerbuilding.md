@@ -41,6 +41,19 @@ Valami valami ha más branch unshallow van, megnézni
 https://stackoverflow.com/questions/39957760/how-to-fetch-all-remote-branches
 (Note: If you combined --depth 1 with a single branch originally, you may need to run git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*" right before running --unshallow to ensure it grabs the history for all branches).
 
+Beleraktam Misi csomagjait is a dev stage-be, dev stage végén próbál a githubbal rendesen csatlakozni
+
+Még meg kell oldani a github authot, de lehet, ha megy a devcontainerrel, akkor csak hagyom.
+
+Lehet érdemesebb lenne a build-et a devtől különválasztani, mert branchváltásnál várni kell két percet a dev csomagok lehúzására.
+Szerintem ezt nem tudja kijavítani semmi se (változik egy egész stage a dev előtt)
+Most csak beleraktam a dev stage-be az építést, és kezdem az egész vonalat a base-től
+
+new.Dockerfile: még nem kezdtem el, majd itt lesz a tutorial alapján történő caches átírás
+csak előtte szeretném, ha pl a branchválasztás rendesen menne
+
+
+
 TMP:
 do build -t dora-test:base --target base . && \
 do run --rm -it dora-test:base bash
@@ -48,4 +61,10 @@ do run --rm -it dora-test:base bash
 do build -t dora-test:prod --target prod . && \
 do run --rm -it dora-test:prod bash
 
+
+do build -t dora-test:prod --build-arg GIT_BRANCH=docker-multistage --target prod . && \
+do run --rm -it dora-test:prod bash
+
+do build -t dora-test:prod --build-arg GIT_BRANCH=docker-multistage --target dev . && \
+do run --rm -it dora-test:prod bash
 
