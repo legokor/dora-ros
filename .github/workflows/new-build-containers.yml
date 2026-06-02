@@ -9,6 +9,7 @@ on:
       - Dockerfile
       - ros2_ws/**/*
       - scripts/*
+      - workflow-test-version.txt
 
 jobs:
   build:
