@@ -39,6 +39,9 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           target: dev
+          build-args: |
+            DORA_CI_ACTION=${{ env.__DORA_CI_ACTION }}
+            GIT_BRANCH=${{ env.__GIT_BRANCH }}
           push: true
           tags: ghcr.io/${{ github.repository }}-dev-${{ github.ref_name }}:latest
           platforms: linux/amd64,linux/arm64
