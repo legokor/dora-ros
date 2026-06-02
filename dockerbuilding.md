@@ -54,6 +54,7 @@ csak előtte szeretném, ha pl a branchválasztás rendesen menne
 
 
 
+
 TMP:
 do build -t dora-test:base --target base . && \
 do run --rm -it dora-test:base bash
