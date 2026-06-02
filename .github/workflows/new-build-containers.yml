@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "**"
+      - "!master"
     paths:
       - .github/workflows/*.yml # bármi workflow változik, fusson
       - Dockerfile
