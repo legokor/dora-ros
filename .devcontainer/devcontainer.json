@@ -20,10 +20,8 @@
 
 		// SSH kulcsok gitnek
 		"-v",
-		"${localEnv:SSH_AUTH_SOCK}:/tmp/ssh-agent.socket",
-		"-e",
-		"SSH_AUTH_SOCK=/tmp/ssh-agent.socket",
-	],
+		"${localEnv:HOME}/.ssh:/root/.ssh:ro"
+	]
 
 	// "remoteUser": "root",
 
