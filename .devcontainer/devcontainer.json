@@ -22,11 +22,11 @@
 		"-v",
 		"${localEnv:HOME}/.ssh/id_rsa:/root/.ssh/id_rsa:ro",
 		"-v",
-		"${localEnv:HOME}/.ssh/id_rsa.pub:/root/.ssh/id_rsa.pub:ro"
+		"${localEnv:HOME}/.ssh/id_rsa.pub:/root/.ssh/id_rsa.pub:ro",
 	],
 
 	// git trust?
-	"postStartCommand": "git config --global --add safe.directory /root/dora-ros"
+	"postStartCommand": "git config --global --add safe.directory /root/dora-ros && git remote set-url origin git@github.com:legokor/dora-ros.git",
 
 	// "remoteUser": "root",
 

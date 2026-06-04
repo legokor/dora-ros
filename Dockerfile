@@ -135,7 +135,6 @@ RUN cd /root/dora-ros/ \
 	&& git fetch --unshallow \
 	&& git remote set-url origin git@github.com:legokor/dora-ros.git
 
-
 # start from the working folder
 WORKDIR /root/dora-ros
 
