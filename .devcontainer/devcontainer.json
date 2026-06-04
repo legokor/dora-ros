@@ -20,13 +20,13 @@
 
 		// SSH credentials
 		"-v",
-		"${localEnv:HOME}/.ssh/id_rsa:/root/.ssh/id_ed25519:ro",
+		"${localEnv:HOME}/.ssh/id_rsa:/root/.ssh/id_rsa:ro",
 		"-v",
-		"${localEnv:HOME}/.ssh/id_rsa.pub:/root/.ssh/id_ed25519.pub:ro",
+		"${localEnv:HOME}/.ssh/id_rsa.pub:/root/.ssh/id_rsa.pub:ro"
 	],
 
 	// git trust?
-	"postStartCommand": "git config --global --add safe.directory /root/dora-ros",
+	"postStartCommand": "git config --global --add safe.directory /root/dora-ros"
 
 	// "remoteUser": "root",
 
