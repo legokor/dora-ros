@@ -69,13 +69,15 @@ do run --rm -it dora-test:prod bash
 do build -t dora-test:prod --build-arg GIT_BRANCH=docker-multistage --target dev . && \
 do run --rm -it dora-test:prod bash
 
+do build -t newbuild -f new.Dockerfile . && \
+do run --rm -it newbuild bash
+
+do build -t dora-test:prod --build-arg GIT_BRANCH=docker-multistage --target dev -f new.Dockerfile . && \
+do run --rm -it dora-test:prod bash
 
 
 
-valami teszt
-
-
-Notes:
+Decon github auth notes:
 Végül csak bemountolva a devcontainer leírásban az ssh kulcs.
 Ezt viszont hozzá kell adni giten:
 Devcontaineren belül ki kell másolni a kulcsot (ssh-ed25519-val kezdődik)

@@ -1,7 +1,7 @@
 {
 	"name": "Dora ROS Developement",
 	// Elméletben van egy
-	"image": "dora-test:prod",
+	"image": "dora-local-devcon",
 	"workspaceMount": "source=${localWorkspaceFolder},target=/root/dora-ros,type=bind",
 	"workspaceFolder": "/root/dora-ros",
 
