@@ -73,3 +73,11 @@ do run --rm -it dora-test:prod bash
 
 
 valami teszt
+
+
+Notes:
+normál shell:
+eval "$(ssh-agent -s)"
+
+fish shell:
+eval (ssh-agent -c)

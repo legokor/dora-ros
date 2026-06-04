@@ -18,10 +18,15 @@
 		"-v",
 		"${localEnv:HOME}/.gitconfig:/etc/gitconfig:ro",
 
-		// SSH kulcsok gitnek
+		// SSH credentials
 		"-v",
-		"${localEnv:HOME}/.ssh:/root/.ssh:ro"
-	]
+		"${localEnv:HOME}/.ssh/id_rsa:/root/.ssh/id_ed25519:ro",
+		"-v",
+		"${localEnv:HOME}/.ssh/id_rsa.pub:/root/.ssh/id_ed25519.pub:ro",
+	],
+
+	// git trust?
+	"postStartCommand": "git config --global --add safe.directory /root/dora-ros",
 
 	// "remoteUser": "root",
 
