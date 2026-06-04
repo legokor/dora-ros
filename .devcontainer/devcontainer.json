@@ -1,6 +1,29 @@
 {
-	"name": "ROS Development (Zed)",
-	"image": "ghcr.io/legokor/dora-ros:latest",
+	"name": "Dora ROS Developement",
+	// Elméletben van egy
+	"image": "dora-test:prod",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/root/dora-ros,type=bind",
+	"workspaceFolder": "/root/dora-ros",
+
+	"runArgs": [
+		// SELinux ne sírjon
+		"--security-opt",
+		"label=disable",
+
+		// Legyen elnevezve
+		"--name",
+		"dora-devcon",
+
+		// Git config 1
+		"-v",
+		"${localEnv:HOME}/.gitconfig:/etc/gitconfig:ro",
+
+		// SSH kulcsok gitnek
+		"-v",
+		"${localEnv:SSH_AUTH_SOCK}:/tmp/ssh-agent.socket",
+		"-e",
+		"SSH_AUTH_SOCK=/tmp/ssh-agent.socket",
+	],
 
 	// "remoteUser": "root",
 

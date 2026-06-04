@@ -71,3 +71,5 @@ do run --rm -it dora-test:prod bash
 
 
 
+
+valami teszt
