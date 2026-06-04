@@ -119,7 +119,7 @@ RUN cd /root/ && git clone --branch ${GIT_BRANCH} --depth=1  https://github.com/
 
 # RPLIDAR copy
 RUN cd /root/dora-ros/ros2_ws/src/ && \
-		git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git
+	git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git
 
 # build the project
 RUN source /root/dora-ros/scripts/build.sh

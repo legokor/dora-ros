@@ -76,8 +76,9 @@ valami teszt
 
 
 Notes:
-normál shell:
-eval "$(ssh-agent -s)"
-
-fish shell:
-eval (ssh-agent -c)
+Végül csak bemountolva a devcontainer leírásban az ssh kulcs.
+Ezt viszont hozzá kell adni giten:
+Devcontaineren belül ki kell másolni a kulcsot (ssh-ed25519-val kezdődik)
+	cat ~/.ssh/id_rsa.pub
+Github -> Settings -> SSH and GPG keys -> New SSH key
+El kell nevezni, és hozzáadni
