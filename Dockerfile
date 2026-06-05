@@ -31,8 +31,6 @@ RUN source ${WORK_DIR}/dora-ros/scripts/build.sh
 # build if running in CI, run on container start
 CMD ["/bin/bash", "-l", "${WORK_DIR}/dora-ros/scripts/run.sh"]
 
-RUN cd ${WORK_DIR}
-
 FROM base AS dev
 
 EXPOSE 22

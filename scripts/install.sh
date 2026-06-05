@@ -20,10 +20,10 @@ apt-get install -y \
     # rplidar package is not maintained :/ \
     # ros-${ROS_DISTRO}-rplidar-ros 
 # ros copy workspace
-if ! [ -d "/path/to/dora-ros" ]; then
+if ! [ -d "/opt/ros/dora-ros" ]; then
     cd /opt/ros && git clone -b Nav2_feature --depth=1 https://github.com/legokor/dora-ros.git
     # RPLIDAR
     cd /opt/ros/dora-ros/ros2_ws/src/ && git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git
 fi
 
-cd DORA_PRE_BUILD_PWD
+cd $DORA_PRE_BUILD_PWD
