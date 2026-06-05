@@ -6,19 +6,9 @@ SHELL ["/bin/bash", "-c"]
 
 ENV WORK_DIR=/opt/ros
 
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    \
-    apt-get install -y \
-        # General apps and python
-        software-properties-common nano curl btop tree unzip \
-        python3 python3-pip 
-
-# cloning base repo:
+# cloning base repos:
 RUN cd /opt/ros && git clone -b Nav2_feature --depth=1 https://github.com/legokor/dora-ros.git
-
 RUN cd /opt/ros/dora-ros/ros2_ws/src/ && git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git
-
 
 # make our lives easier
 RUN echo \
