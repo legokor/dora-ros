@@ -6,7 +6,7 @@ services:
       target: dev
 
     volumes:
-      - dora-vol:/opt/ros/
+      - dora-vol:/opt/ros/kilted
 
     tty: true
 

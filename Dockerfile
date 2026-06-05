@@ -1,10 +1,20 @@
 # dora Docker
 
+## Before fresh building run "docker create volume dora-vol"
+
 FROM ros:kilted AS base
 
 SHELL ["/bin/bash", "-c"]
 
 ENV WORK_DIR=/opt/ros
+
+# installing common programs
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    \
+    apt-get install -y \
+    software-properties-common nano curl btop tree unzip \
+    python3 python3-pip 
 
 # cloning base repos:
 RUN cd /opt/ros && git clone -b Nav2_feature --depth=1 https://github.com/legokor/dora-ros.git

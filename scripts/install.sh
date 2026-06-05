@@ -8,8 +8,6 @@ apt-get update && \
 apt-get upgrade -y && \
 \
 apt-get install -y \
-    software-properties-common nano curl btop tree unzip \
-    python3 python3-pip \
     python3-rosdep \
     ros-dev-tools \
     ros-${ROS_DISTRO}-xacro \
