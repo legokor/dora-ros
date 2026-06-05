@@ -21,7 +21,7 @@ RUN echo "Europe/Budapest" > /etc/timezone
 RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
 
 # setup ros environment in shell
-RUN echo 'source ${WORK_DIR}/setup.bash' >> /root/.bashrc
+RUN echo 'source ${WORK_DIR}/${ROS_DISTRO}/setup.bash' >> /root/.bashrc
 
 # starts controller with rplidar
 FROM base AS dora
@@ -30,6 +30,8 @@ RUN source ${WORK_DIR}/dora-ros/scripts/build.sh
 
 # build if running in CI, run on container start
 CMD ["/bin/bash", "-l", "${WORK_DIR}/dora-ros/scripts/run.sh"]
+
+RUN cd ${WORK_DIR}
 
 FROM base AS dev
 

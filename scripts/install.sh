@@ -8,21 +8,17 @@ apt-get update && \
 apt-get upgrade -y && \
 \
 apt-get install -y \
-    # General apps and python
     software-properties-common nano curl btop tree unzip \
     python3 python3-pip \
-    # Removed ranger and neovim to boost build time
-    # Ros tools
     python3-rosdep \
     ros-dev-tools \
     ros-${ROS_DISTRO}-xacro \
     ros-${ROS_DISTRO}-joint-state-publisher \
-    # rplidar package is not maintained :/ \
-    # ros-${ROS_DISTRO}-rplidar-ros \
     ros-${ROS_DISTRO}-navigation2 \
     ros-${ROS_DISTRO}-nav2-bringup \
     ros-${ROS_DISTRO}-slam-toolbox
-
+    # rplidar package is not maintained :/ \
+    # ros-${ROS_DISTRO}-rplidar-ros 
 # ros copy workspace
 if ! [ -d "/path/to/dora-ros" ]; then
     cd /opt/ros && git clone -b Nav2_feature --depth=1 https://github.com/legokor/dora-ros.git
