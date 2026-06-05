@@ -24,7 +24,10 @@ apt-get install -y \
     ros-${ROS_DISTRO}-slam-toolbox
 
 # ros copy workspace
-cd /opt/ros && git clone --depth=1 https://github.com/legokor/dora-ros.git
+if ! [ -d "/path/to/dora-ros" ]; then
+    cd /opt/ros && git clone -b Nav2_feature --depth=1 https://github.com/legokor/dora-ros.git
+    # RPLIDAR
+    cd /opt/ros/dora-ros/ros2_ws/src/ && git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git
+fi
 
-# RPLIDAR
-cd /opt/ros/dora-ros/ros2_ws/src/ && git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git
+cd DORA_PRE_BUILD_PWD

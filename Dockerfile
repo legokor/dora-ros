@@ -17,6 +17,9 @@ RUN apt-get update && \
 # cloning base repo:
 RUN cd /opt/ros && git clone -b Nav2_feature --depth=1 https://github.com/legokor/dora-ros.git
 
+RUN cd /opt/ros/dora-ros/ros2_ws/src/ && git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git
+
+
 # make our lives easier
 RUN echo \
     $'alias py=python3\n' \
@@ -29,8 +32,6 @@ RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
 
 # setup ros environment in shell
 RUN echo 'source ${WORK_DIR}/setup.bash' >> /root/.bashrc
-
-
 
 # starts controller with rplidar
 FROM base AS dora
