@@ -2,7 +2,7 @@
 
 DORA_PRE_BUILD_PWD=$PWD
 
-cd /root/dora-ros/ros2_ws/ &&
+cd /opt/ros/dora-ros/ros2_ws/ &&
 source /opt/ros/${ROS_DISTRO}/setup.bash
 
 rosdep update &&

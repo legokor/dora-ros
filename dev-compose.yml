@@ -1,0 +1,18 @@
+services:
+  ros2:
+    container_name: dora-ros
+    build: 
+      context: .
+      target: dev
+
+    volumes:
+      - dora-vol:/opt/ros/
+
+    tty: true
+
+    network_mode: host
+    ipc: host
+
+volumes:
+  dora-vol:
+    
