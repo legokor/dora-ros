@@ -6,7 +6,16 @@ services:
       target: dev
 
     volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
       - dora-vol:/opt/ros/kilted
+    
+    environment:
+      - DISPLAY=${DISPLAY}
+      - XDG_RUNTIME_DIR=/tmp/runtime-root
+      - LIBGL_ALWAYS_SOFTWARE=0
+
+    devices:
+      - /dev/dri:/dev/dri
 
     tty: true
 
@@ -15,4 +24,4 @@ services:
 
 volumes:
   dora-vol:
-    
+

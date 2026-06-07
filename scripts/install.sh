@@ -14,7 +14,10 @@ apt-get install -y \
     ros-${ROS_DISTRO}-joint-state-publisher \
     ros-${ROS_DISTRO}-navigation2 \
     ros-${ROS_DISTRO}-nav2-bringup \
-    ros-${ROS_DISTRO}-slam-toolbox
+    ros-${ROS_DISTRO}-slam-toolbox \
+    ros-${ROS_DISTRO}-rviz2 \
+    ros-${ROS_DISTRO}-rqt \
+    ros-${ROS_DISTRO}-rqt-common-plugins
     # rplidar package is not maintained :/ \
     # ros-${ROS_DISTRO}-rplidar-ros 
 # ros copy workspace
