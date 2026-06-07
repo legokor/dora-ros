@@ -24,6 +24,8 @@ RUN cd /opt/ros/dora-ros/ros2_ws/src/ && git clone --depth=1 -b ros2 https://git
 RUN echo \
     $'alias py=python3\n' \
     $'alias c=clear\n' \
+    $'cd ${WORK_DIR}/dora-ros\n' \
+    $'git pull\n' \
         >> /root/.bashrc
 
 # timezones
@@ -43,7 +45,7 @@ CMD ["/bin/bash", "-l", "${WORK_DIR}/dora-ros/scripts/run.sh"]
 
 FROM base AS dev
 
-RUN cd ${WORK_DIR}
+CMD ["/bin/bash", "-l", "source", "/opt/ros/kilted/setup.bash", "cd", ""]
 
 EXPOSE 22
 
