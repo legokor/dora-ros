@@ -43,6 +43,8 @@ CMD ["/bin/bash", "-l", "${WORK_DIR}/dora-ros/scripts/run.sh"]
 
 FROM base AS dev
 
+RUN cd ${WORK_DIR}
+
 EXPOSE 22
 
 # removed neovim becuase nobody uses neovim.
