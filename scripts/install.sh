@@ -29,4 +29,6 @@ if ! [ -d "/opt/ros/dora-ros" ]; then
     cd /opt/ros/dora-ros/ros2_ws/src/ && git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git
 fi
 
+source /opt/ros/kilted/setup.bash
+
 cd $DORA_PRE_BUILD_PWD
