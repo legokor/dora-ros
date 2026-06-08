@@ -7,7 +7,7 @@ DORA_PRE_BUILD_PWD=$PWD
 apt-get update && \
 apt-get upgrade -y && \
 \
-apt-get install -y \
+apt install -y \
     python3-rosdep \
     ros-dev-tools \
     ros-${ROS_DISTRO}-xacro \
@@ -17,7 +17,6 @@ apt-get install -y \
     ros-${ROS_DISTRO}-slam-toolbox \
     ros-${ROS_DISTRO}-rviz2 \
     ros-${ROS_DISTRO}-rviz-default-plugins \
-    libogre-1.12-dev \
     ros-${ROS_DISTRO}-rqt \
     ros-${ROS_DISTRO}-rqt-common-plugins
     # rplidar package is not maintained :/ \

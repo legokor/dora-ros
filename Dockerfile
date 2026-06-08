@@ -24,6 +24,7 @@ RUN cd /opt/ros/dora-ros/ros2_ws/src/ && git clone --depth=1 -b ros2 https://git
 RUN echo \
     $'alias py=python3\n' \
     $'alias c=clear\n' \
+    $'source /opt/ros/kilted/setup.bash\n' \
     $'cd ${WORK_DIR}/dora-ros\n' \
     $'git pull\n' \
         >> /root/.bashrc
@@ -38,14 +39,11 @@ RUN echo 'source ${WORK_DIR}/${ROS_DISTRO}/setup.bash' >> /root/.bashrc
 # starts controller with rplidar
 FROM base AS dora
 
-RUN source ${WORK_DIR}/dora-ros/scripts/build.sh
-
-# build if running in CI, run on container start
-CMD ["/bin/bash", "-l", "${WORK_DIR}/dora-ros/scripts/run.sh"]
+CMD /bin/bash -l -c "exec /bin/bash && ${WORK_DIR}/dora-ros/scripts/build-and-run.sh"
 
 FROM base AS dev
 
-CMD ["/bin/bash", "-l", "source", "/opt/ros/kilted/setup.bash", "cd", ""]
+CMD /bin/bash -l -c "exec /bin/bash"
 
 EXPOSE 22
 
