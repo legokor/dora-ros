@@ -9,25 +9,32 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(rosidl_default_generators REQUIRED) # For generating messages
 
 include_directories(include)
 include_directories(launch)
 
+# Generating messages
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/KeyInputMsg.msg"
+  "msg/MouseInputMsg.msg"
+  )
+
 # Create the executable
-add_executable(drift_control src/drift.cpp)
+add_executable(key_control src/keyMovement.cpp)
 
 # Link against necessary libraries
-ament_target_dependencies(drift_control rclcpp geometry_msgs)
+ament_target_dependencies(key_control rclcpp geometry_msgs)
 
 # Install
-install(TARGETS drift_control DESTINATION lib/${CMAKE_PROJECT_NAME})
+install(TARGETS key_control DESTINATION lib/${CMAKE_PROJECT_NAME})
 
 install(DIRECTORY launch images DESTINATION share/${CMAKE_PROJECT_NAME}/)
 
 install(PROGRAMS
-  scripts/teleop_key.py
+  scripts/teleopKey.py
   DESTINATION lib/${PROJECT_NAME}
-  RENAME teleop_key
+  RENAME teleopKey
 )
 
 ament_export_dependencies(rosidl_default_runtime)

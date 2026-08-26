@@ -73,6 +73,7 @@
         </joint>
     </xacro:macro>
 
+    <!-- Lidar rod -->
     <xacro:macro name="lidar_rod" params="idx">
         <xacro:property name="angle" value='${pi / 2 + 2 * pi * idx / 3}' />
         <!-- No need for new links to contain the rods -->
@@ -146,6 +147,15 @@
         </collision>
     </link>
 
+    <!-- Laser frame for Lidar -->
+    <link name="laser"></link>
+
+    <joint name="laser_joint" type="fixed">
+        <parent link="base_lidar"/>
+        <child link="laser"/>
+    </joint>
+
+    <!-- Lidar motor -->
     <joint name="lidar_joint" type="continuous">
         <parent link="base_link" />
         <child link="base_lidar" />
