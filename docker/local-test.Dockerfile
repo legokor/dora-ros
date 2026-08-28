@@ -7,7 +7,11 @@ FROM ros:kilted AS base
 
 SHELL ["/bin/bash", "-c"]
 
-ENV WORK_DIR=~
+WORKDIR root
+
+# timezones
+RUN echo "Europe/Budapest" > /etc/timezone
+RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
 
 # installing common programs
 RUN apt-get update && \
@@ -19,14 +23,10 @@ RUN apt-get update && \
 
 # Copying repos
 # Warning: This experiment dockerfile will NOT contain the rplidar repo unless previously cloned
-COPY ../.
+COPY --chmod=777 .. .
 
 # make our lives easier
-RUN echo ${WORK_DIR}/dora-ros/scripts/bashrcExtension.txt >> /root/.bashrc
-
-# timezones
-RUN echo "Europe/Budapest" > /etc/timezone
-RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
+RUN echo ./scripts/bashrcExtension.txt >> /root/.bashrc
 
 # starts controller with rplidar
 FROM base AS dora

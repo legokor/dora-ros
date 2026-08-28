@@ -2,8 +2,9 @@ services:
   dev:
     container_name: dev
     build: 
-      context: .
+      context: ..
       target: dev
+      dockerfile: docker/local-test.Dockerfile
       
     tty: true
     
@@ -24,8 +25,9 @@ services:
   dora:
     container_name: dora
     build: 
-      context: .
+      context: ..
       target: dora
+      dockerfile: docker/local-test.Dockerfile
 
     tty: true
 

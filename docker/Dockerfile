@@ -25,7 +25,7 @@ RUN git clone -b Nav2_feature --depth=1 https://github.com/legokor/dora-ros.git
 RUN git clone --depth=1 -b ros2 https://github.com/Slamtec/rplidar_ros.git dora-ros/ros2_ws/src/
 
 # make our lives easier
-RUN echo dora-ros/scripts/bashrcExtension.txt >> .bashrc
+#RUN echo ./dora-ros/scripts/bashrcExtension.txt >> .bashrc
 
 # starts controller with rplidar
 FROM base AS dora

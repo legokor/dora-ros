@@ -1,11 +1,10 @@
 #!/bin/bash
 
-# Check if container exists
-if !(docker container list | grep -q "dora-ros-dora"); then
-	echo "Docker container not found. Composing:"
-	docker compose up dora
+# If you want to force rebuild, run the script with -f flag
+if [[ "$1" == "-f" ]]; then
+	docker compose -f docker/docker-compose.yml up dora --build
 else
-	echo "Container found, executing."
+	docker compose -f docker/docker-compose.yml up dora
 fi
 
 # Launch container

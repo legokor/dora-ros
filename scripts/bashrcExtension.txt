@@ -2,9 +2,6 @@
 # ~/.bashrc
 #
 
-# If not running interactively, don't do anything
-[[ $- != *i* ]] && return
-
 # Alias
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
@@ -25,5 +22,3 @@ PS1="\[${GREEN}\t ${CYAN}\u${NC}@${YELLOW}\h${NC} ${BLUE}\w${NC} ${GREEN}\$${NC}
 
 # Workspace setup
 source /opt/ros/kilted/setup.bash
-cd ${WORK_DIR}/dora-ros
-git pull
