@@ -8,3 +8,5 @@ Reset: 3
 Pause: 4
 Resume: 5
 Cleanup: 6
+
+(Lehet rvizből is irányítani)

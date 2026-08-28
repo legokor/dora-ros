@@ -5,44 +5,31 @@
 Clone repo to get compose file:
 ```bash
 git clone git@github.com:legokor/dora-ros.git
-cd dora-ros
-```
-
-Or just download it:
-```bash
-wget https://github.com/legokor/dora-ros/raw/refs/heads/master/docker-compose.yml
 ```
 
 <!-- TODO: use compose to set LiDar permissions -->
+<!-- Comment: Don't you only need read permission? -->
 Permission to access the LiDar:
 ```bash
 sudo chmod 777 /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0
 ```
 
-### Start container
+## Docker setup
 
-```bash
-docker-compose up -d
-```
-By default this starts everything.
+### Dora Container
 
-### Connect to container
+Starting the container:
 
-```bash
-docker exec -it dora-ros bash
-```
+### Development Container
 
-### Restart container
+You can now also run launch-devcon.sh on linux systems to launch the development container
+On Windows, you can either run WSL, then run the script from there, or run
+docker compose up --attach dev, then connect through VSCode. 
 
-```bash
-docker start dora-ros
-```
+### Run rviz in the development container
 
-### Stop container
-
-```bash
-docker stop dora-ros
-```
+The script should attach your X11 session to the container
+However, run install.sh in the container first to install ogre libraries and rviz
 
 ## ROS commands
 
@@ -52,21 +39,17 @@ docker stop dora-ros
 ros2 service call /stop_motor std_srvs/srv/Empty {}
 ```
 
-## Run rviz on another machine
-
-If you're running rviz in a Docker container you need to give it access to your X server:
-```bash
-xhost +local:
-```
-
-Running like this gives the container access to your X11 session and starts `rviz`:
-```bash
-docker run --rm -itv /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY --network host ghcr.io/legokor/dora-ros-rviz:latest
-```
-
-## Move robot
+### Moving the robot
 
 ```bash
 ros2 topic pub -1 /dora/cmd_vel geometry_msgs/msg/Twist '{ linear: { x: 0, y: 0 }, angular: { z: 0 } }'
+```
+
+The teleop_control package provides WASD control through PyGame. In the ros2-ws folder run:
+
+```bash
+colcon build
+source install/setup.bash
+ros2 launch teleop_control launchKeyMovement.xml
 ```
 

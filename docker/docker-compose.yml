@@ -1,0 +1,45 @@
+services:
+  dev:
+    container_name: dev
+    build: 
+      context: .
+      target: dev
+      
+    tty: true
+    
+    network_mode: host
+    ipc: host
+
+    volumes:
+      - dev-vol:/opt/ros/kilted
+    
+    environment:
+      - DISPLAY=${DISPLAY}
+      - XDG_RUNTIME_DIR=/tmp/runtime-root
+      - LIBGL_ALWAYS_SOFTWARE=0
+
+    devices:
+      - /dev/dri:/dev/dri
+
+  dora:
+    container_name: dora
+    build: 
+      context: .
+      target: dora
+
+    tty: true
+
+    network_mode: host
+    ipc: host
+
+    volumes:
+      - dora-vol:/opt/ros/kilted
+
+    devices:
+      - "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0:/dev/ttyUSB0"
+      - "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A5XK3RJT-if00-port0:/dev/ttyUSB1"
+
+volumes:
+  dora-vol:
+  dev-vol:
+
