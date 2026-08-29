@@ -111,11 +111,13 @@ void OdometryNode::odomUpdate(const TwistStamped::SharedPtr& speedData) {
     double vth = speedData->twist.angular.z;
 
     // Coordinate transform
+    // Necessary because the coordinate system of the encoder rotates.
     double delta_th = vth * delta_time;
     double mid_th = th_total + delta_th / 2.0; // The average of the time interval
     double delta_x = (vx * cos(mid_th) - vy * sin(mid_th)) * delta_time;
     double delta_y = (vx * sin(mid_th) + vy * cos(mid_th)) * delta_time;
 
+	// Summing deltas:
     x_total += delta_x;
     y_total += delta_y;
     th_total += delta_th;

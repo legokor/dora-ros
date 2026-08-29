@@ -23,7 +23,7 @@ RUN apt-get update && \
 
 # Copying repos
 # Warning: This experiment dockerfile will NOT contain the rplidar repo unless previously cloned
-COPY --chmod=777 .. .
+COPY --chmod=755 .. .
 
 # make our lives easier
 RUN echo ./scripts/bashrcExtension.txt >> /root/.bashrc

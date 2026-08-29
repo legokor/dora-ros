@@ -48,6 +48,7 @@ void ControllerNode::publishMeasure(const SpeedData& msg) {
     twist_publisher->publish(newmsg);
 }
 
+// Currently only looks for SpeedData and RobotStatus messages
 void ControllerNode::handleReceivedMessage(const ReceivedMessage& msg) {
     if (std::holds_alternative<SpeedData>(msg)) {
         publishMeasure(std::get<SpeedData>(msg));

@@ -5,6 +5,6 @@
 # If there are changes in the image, docker compose up automatically rebuilds
 
 echo "Removing container and volume: (Takes a bit of time to gracefully remove)"
-docker compose down dora
+docker compose -f docker/docker-compose.yml down dora
 docker volume rm docker_dora-vol
 echo "If no error messages were present, then removing was a success!"

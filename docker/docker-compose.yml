@@ -1,6 +1,8 @@
 services:
   dev:
     container_name: dev
+    
+    # Build settings
     build: 
       context: ..
       target: dev
@@ -8,22 +10,32 @@ services:
       
     tty: true
     
+    # Network settings
     network_mode: host
     ipc: host
 
+    # Mounting X11 socket and sharing host dbus for GUI apps
+    # Also mounting volumes 
     volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
       - dev-vol:/opt/ros/kilted
+      - dev-tools-vol:/usr
+      - dev-settings-vol:/root
     
+    # Environment variables for GUI app use.
     environment:
       - DISPLAY=${DISPLAY}
       - XDG_RUNTIME_DIR=/tmp/runtime-root
       - LIBGL_ALWAYS_SOFTWARE=0
 
+    # Sharing all devices. Most important is the GPU for rendering GUI
     devices:
       - /dev/dri:/dev/dri
 
   dora:
     container_name: dora
+    
+    # Build settings
     build: 
       context: ..
       target: dora
@@ -31,17 +43,27 @@ services:
 
     tty: true
 
+    # Network settings
     network_mode: host
     ipc: host
 
+    # Storage settings
     volumes:
       - dora-vol:/opt/ros/kilted
 
+    # Mounting Lidar and UART adapter 
     devices:
       - "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0:/dev/ttyUSB0"
       - "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A5XK3RJT-if00-port0:/dev/ttyUSB1"
 
+# Storage volumes
 volumes:
+  # For ros packages on the robot (like nav2)
   dora-vol:
+  # For ros packages in the dev container
   dev-vol:
+  # For apps downloaded in /usr
+  dev-tools-vol:
+  # For user configurations storing in /root
+  dev-settings-vol:
 

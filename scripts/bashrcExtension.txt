@@ -21,4 +21,5 @@ NC='\[\e[0m\]' # No Color
 PS1="\[${GREEN}\t ${CYAN}\u${NC}@${YELLOW}\h${NC} ${BLUE}\w${NC} ${GREEN}\$${NC} \]"
 
 # Workspace setup
+git pull
 source /opt/ros/kilted/setup.bash

@@ -1,3 +1,8 @@
+
+# Navigation2 configuration file for Dora
+
+# Provides high level control through a behavioural tree, which is basically a tree graph
+# where each node is a condition or an action (or both).
 bt_navigator:
   ros__parameters:
     use_sim_time: False
@@ -10,10 +15,13 @@ bt_navigator:
     groot_zmq_publisher_port: 1666
     groot_zmq_server_port: 1667
 
+# Rclcpp node of BT nav.
 bt_navigator_rclcpp_node:
   ros__parameters:
     use_sim_time: False
 
+
+# Controls the stack's Twist msg output. Can be fine tuned for different scenarios 
 controller_server:
   ros__parameters:
     odom_topic: "/odom"
@@ -82,11 +90,14 @@ controller_server:
         scale: 32.0
         slowing_factor: 5.0
         lookahead_time: -1.0
-      
+
+# Rclcpp node of coltrol server.
 controller_server_rclcpp_node:
   ros__parameters:
     use_sim_time: False
 
+# SLAM parameter. Configures the detailed costmap containing
+# a lot of information about objects in close proximity
 local_costmap:
   ros__parameters:
     update_frequency: 5.0
@@ -136,6 +147,8 @@ local_costmap_rclcpp_node:
   ros__parameters:
     use_sim_time: False
 
+# SLAM parameter. Configures the less detailed costmap which contains
+# less information than the local costmap, but over a wider range (Has to be configure for that though)
 global_costmap:
   ros__parameters:
     update_frequency: 1.0
@@ -178,11 +191,13 @@ global_costmap_rclcpp_node:
   ros__parameters:
     use_sim_time: False
 
+# Publishes the map created by SLAM
 map_server:
   ros__parameters:
     use_sim_time: False
     yaml_filename: "map.yaml"
 
+# Saves the map created by SLAM
 map_saver:
   ros__parameters:
     use_sim_time: False
@@ -191,6 +206,7 @@ map_saver:
     occupied_thresh_default: 0.65
     map_subscribe_transient_local: True
 
+# Route planner. Makes a path in regard to known obstacles
 planner_server:
   ros__parameters:
     expected_planner_frequency: 20.0
@@ -206,6 +222,8 @@ planner_server_rclcpp_node:
   ros__parameters:
     use_sim_time: False
 
+# Standard behaviour server. Controls what to do when new information presents
+# along the planned route
 behavior_server:
   ros__parameters:
     local_costmap_topic: local_costmap/costmap_raw
@@ -239,7 +257,7 @@ waypoint_follower:
     loop_rate: 20
     use_sim_time: False
 
-# Haladóbb ütközés detektáló (launch-hoz kellett, nézzük meg milyen.)
+# More advanced collision monitor (Stops the robot when an object is within radius
 collision_monitor:
   ros__parameters:
     use_sim_time: False
@@ -275,6 +293,7 @@ collision_monitor:
       prediction_distance: 0.0
       visualize: True
 
+# For docking the robot to a charger
 docking_server:
   ros__parameters:
     use_sim_time: False
