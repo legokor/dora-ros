@@ -18,7 +18,7 @@ RUN apt-get update && \
     apt-get upgrade -y && \
     \
     apt-get install -y \
-    software-properties-common nano curl btop tree unzip neovim \
+    software-properties-common nano curl btop tree unzip neovim foot \
     python3 python3-pip 
 
 # Copying repos
@@ -26,7 +26,7 @@ RUN apt-get update && \
 COPY --chmod=755 .. .
 
 # make our lives easier
-RUN echo ./scripts/bashrcExtension.txt >> /root/.bashrc
+RUN echo "source /root/scripts/bashrcExtenstion.bash" >> .bashrc
 
 # starts controller with rplidar
 FROM base AS dora
@@ -35,6 +35,9 @@ CMD /bin/bash -l -c "${WORK_DIR}/dora-ros/scripts/build-and-run.sh"
 
 FROM base AS dev
 
-CMD /bin/bash -l -c "exec /bin/bash"
+# GUI dependencies
+
+RUN apt-get install -y \
+	dbus dbus-x11 dconf-service dconf-cli at-spi2-core x11-utils
 
 EXPOSE 22

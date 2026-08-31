@@ -31,10 +31,7 @@ void OdometryNode::sendTransform(const rclcpp::Time& current_time) {
         // Rotational data
         tf2::Quaternion q;
         q.setRPY(0, 0, th_total);
-        msg.transform.rotation.x = q.x();
-        msg.transform.rotation.y = q.y();
-        msg.transform.rotation.z = q.z();
-        msg.transform.rotation.w = q.w();
+        msg.transform.rotation.x = q;
         
         // Publishing message
         tf_broadcaster->sendTransform(msg);
@@ -56,31 +53,18 @@ void OdometryNode::sendOdometry(const TwistStamped::SharedPtr& speedData) {
         msg.child_frame_id = "base_footprint";
 
         // Setting positional data
-        msg.pose.pose.position.x = x_total;
-        msg.pose.pose.position.y = y_total;
-        msg.pose.pose.position.z = 0;
+        msg.pose.pose.position = {x_total, y_total, 0}; // Z = 0
 
         // Rotational data
         tf2::Quaternion q;
         q.setRPY(0, 0, th_total);
-        msg.pose.pose.orientation = tf2::toMsg(q);
+        msg.pose.pose.orientation = q;
 
         // Velocity data
-        msg.twist.twist.linear.x = speedData->twist.linear.x;
-        msg.twist.twist.linear.y = speedData->twist.linear.y;
-        msg.twist.twist.angular.z = speedData->twist.angular.z;
-
+        msg.twist.twist.linear = speedData->twist.linear;
+        
         // TODO: Calculate proper covariance matrix
-        msg.pose.covariance = {
-            0.03, 0.0,  0.0,  0.0,  0.0,  0.0,  // X 
-            0.0,  0.03, 0.0,  0.0,  0.0,  0.0,  // Y
-            0.0,  0.0,  1e-5, 0.0,  0.0,  0.0,  // Z
-            0.0,  0.0,  0.0,  1e-5, 0.0,  0.0,  // Roll
-            0.0,  0.0,  0.0,  0.0,  1e-5, 0.0,  // Pitch
-            0.0,  0.0,  0.0,  0.0,  0.0,  0.03  // Yaw
-        };
-
-        msg.twist.covariance = {
+        double covariance[36] = {
             0.03, 0.0,  0.0,  0.0,  0.0,  0.0,  // X 
             0.0,  0.03, 0.0,  0.0,  0.0,  0.0,  // Y
             0.0,  0.0,  1e-5, 0.0,  0.0,  0.0,  // Z
@@ -89,6 +73,9 @@ void OdometryNode::sendOdometry(const TwistStamped::SharedPtr& speedData) {
             0.0,  0.0,  0.0,  0.0,  0.0,  0.03  // Yaw
         };
         
+        msg.pose.covariance = covariance;
+        msg.twist.covariance = covariance;
+        
         // Publishing message
         odom_publisher->publish(msg);
 
@@ -96,7 +83,7 @@ void OdometryNode::sendOdometry(const TwistStamped::SharedPtr& speedData) {
         std::stringstream ss;
         ss << "Odometry:\n" <<
             "- Pose: " << x_total << " ; " << y_total << " ; " << th_total << "\n" <<
-            "- Velocity: " << speedData->twist.linear.x << " ; " << speedData->twist.linear.y << " ; " << speedData->twist.angular.z << "\n";
+            "- Velocity: " << speedData->twist.linear << "\n";
         RCLCPP_INFO(get_logger(), ss.str().c_str());
 }
 

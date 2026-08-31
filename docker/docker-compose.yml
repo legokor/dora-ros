@@ -21,14 +21,17 @@ services:
       - dev-vol:/opt/ros/kilted
       - dev-tools-vol:/usr
       - dev-settings-vol:/root
+      - dev-var-vol:/var
     
     # Environment variables for GUI app use.
     environment:
       - DISPLAY=${DISPLAY}
       - XDG_RUNTIME_DIR=/tmp/runtime-root
       - LIBGL_ALWAYS_SOFTWARE=0
+      - NO_AT_BRIDGE=1
+      - GTK_THEME="Adwaita-dark"
 
-    # Sharing all devices. Most important is the GPU for rendering GUI
+    # Sharing all devices. The most important device is the GPU for rendering GUI
     devices:
       - /dev/dri:/dev/dri
 
@@ -59,11 +62,13 @@ services:
 # Storage volumes
 volumes:
   # For ros packages on the robot (like nav2)
-  dora-vol:
+  dora-vol: # /opt/ros/kilted
   # For ros packages in the dev container
-  dev-vol:
+  dev-vol: # /opt/ros/kilted
   # For apps downloaded in /usr
-  dev-tools-vol:
+  dev-tools-vol: # /usr
   # For user configurations storing in /root
-  dev-settings-vol:
+  dev-settings-vol: # /vol
+  # For saving app data
+  dev-var-vol: # /var
 

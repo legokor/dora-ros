@@ -23,8 +23,8 @@ Starting the container:
 ### Development Container
 
 You can now also run launch-devcon.sh on linux systems to launch the development container.
-On Windows, you can either run WSL, then run the script from there, or run
-docker compose up --attach dev, then connect through VSCode. 
+On Windows 11, you can run WSL2, then run the script from there.
+Windows 10 Home systems require a virtual machine due to Microsoft policy.
 
 ### Run rviz in the development container
 

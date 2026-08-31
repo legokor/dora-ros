@@ -37,9 +37,9 @@ class TeleopKeyPublisher(Node):
 		
 		# Selecting modifier keys
 		# event.mod is a bitmask and each bit preresents a modifier key. Pressed = 1
-		msg.shift = bool(event.mod & pygame.KMOD_SHIFT)
-        msg.ctrl = bool(event.mod & pygame.KMOD_CTRL)
-        msg.alt = bool(event.mod & pygame.KMOD_ALT)
+		msg.shift = bool(keyEvent.mod & pygame.KMOD_SHIFT)
+        msg.ctrl = bool(keyEvent.mod & pygame.KMOD_CTRL)
+        msg.alt = bool(keyEvent.mod & pygame.KMOD_ALT)
 				
 		# Publishing
 		self.keyPublisher.publish(msg)
