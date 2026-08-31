@@ -27,9 +27,9 @@ services:
     environment:
       - DISPLAY=${DISPLAY}
       - XDG_RUNTIME_DIR=/tmp/runtime-root
+      - XDG_CONFIG_HOME=/root/.config
       - LIBGL_ALWAYS_SOFTWARE=0
       - NO_AT_BRIDGE=1
-      - GTK_THEME="Adwaita-dark"
 
     # Sharing all devices. The most important device is the GPU for rendering GUI
     devices:
@@ -65,10 +65,10 @@ volumes:
   dora-vol: # /opt/ros/kilted
   # For ros packages in the dev container
   dev-vol: # /opt/ros/kilted
-  # For apps downloaded in /usr
+  # For apps downloaded via apt-get
   dev-tools-vol: # /usr
-  # For user configurations storing in /root
-  dev-settings-vol: # /vol
+  # For user configurations stored in a home directory (in this case /root)
+  dev-settings-vol: # /root
   # For saving app data
   dev-var-vol: # /var
 

@@ -19,7 +19,7 @@ CYAN='\[\e[0;36m\]'
 NC='\[\e[0m\]' # No Color
 
 # PS
-PS1="\[${GREEN}\t ${CYAN}\u${NC}@${YELLOW}\h${NC} ${BLUE}\w${NC} ${GREEN}\$${NC} \]"
+PS1="${GREEN}\t ${CYAN}\u${NC}@${YELLOW}\h${NC} ${BLUE}\w${NC} ${GREEN}\$${NC} "
 
 # Workspace setup
 source /opt/ros/kilted/setup.bash
