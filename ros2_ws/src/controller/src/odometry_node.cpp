@@ -1,7 +1,5 @@
 #include "controller/odometry_node.hpp"
 
-#include <string>
-
 using namespace dora;
 using TwistStamped = geometry_msgs::msg::TwistStamped;
 
@@ -24,14 +22,12 @@ void OdometryNode::sendTransform(const rclcpp::Time& current_time) {
         msg.child_frame_id = "base_footprint";
 
         // Setting positional data
-        msg.transform.translation.x = x_total;
-        msg.transform.translation.y = y_total;
-        msg.transform.translation.z = 0.0;
+        msg.transform.translation = tf2::toMsg(tf2::Vector3(x_total, y_total, 0.0));
 
         // Rotational data
         tf2::Quaternion q;
-        q.setRPY(0, 0, th_total);
-        msg.transform.rotation.x = q;
+        q.setRPY(0.0, 0.0, th_total);
+        msg.transform.rotation = tf2::toMsg(q);
         
         // Publishing message
         tf_broadcaster->sendTransform(msg);
@@ -53,18 +49,21 @@ void OdometryNode::sendOdometry(const TwistStamped::SharedPtr& speedData) {
         msg.child_frame_id = "base_footprint";
 
         // Setting positional data
-        msg.pose.pose.position = {x_total, y_total, 0}; // Z = 0
+        // Sadly, there is no vector3->point conversion despite being literally the same
+        msg.pose.pose.position.x = x_total;
+        msg.pose.pose.position.y = y_total;
+        msg.pose.pose.position.z = 0.0;
 
         // Rotational data
         tf2::Quaternion q;
         q.setRPY(0, 0, th_total);
-        msg.pose.pose.orientation = q;
+        msg.pose.pose.orientation = tf2::toMsg(q);
 
         // Velocity data
         msg.twist.twist.linear = speedData->twist.linear;
         
         // TODO: Calculate proper covariance matrix
-        double covariance[36] = {
+        std::array<double, 36> covariance = {
             0.03, 0.0,  0.0,  0.0,  0.0,  0.0,  // X 
             0.0,  0.03, 0.0,  0.0,  0.0,  0.0,  // Y
             0.0,  0.0,  1e-5, 0.0,  0.0,  0.0,  // Z
@@ -83,7 +82,7 @@ void OdometryNode::sendOdometry(const TwistStamped::SharedPtr& speedData) {
         std::stringstream ss;
         ss << "Odometry:\n" <<
             "- Pose: " << x_total << " ; " << y_total << " ; " << th_total << "\n" <<
-            "- Velocity: " << speedData->twist.linear << "\n";
+            "- Velocity: " << speedData->twist.linear.x << ";" << speedData->twist.linear.y << ";" << speedData->twist.linear.z << "\n";
         RCLCPP_INFO(get_logger(), ss.str().c_str());
 }
 

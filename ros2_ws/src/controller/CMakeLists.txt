@@ -38,5 +38,8 @@ install(DIRECTORY launch res DESTINATION share/${CMAKE_PROJECT_NAME}/)
 
 ament_export_dependencies(rosidl_default_runtime)
 
+# Exporting configuration for clang
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Ament package
 ament_package()

@@ -37,13 +37,23 @@ packages=(
 	gnome-themes-extra-data   # Adwaita-dark theme
 	adwaita-qt   # Matching qt5 theme for Adwaita-dark
 	adwaita-qt6  # Matching qt6 theme for Adwaita-dark
+	papirus-icon-theme  # Nice looking icon theme
 	dbus dbus-x11 dconf-service dconf-cli at-spi2-core x11-utils # Various GUI dependencies
+	
+	# Language servers for code editing
+	python3-pylsp
+	clangd-20
 )
 
+# Installing packages
 apt-get update
 apt-get upgrade -y
 apt-get install -y "${packages[@]}"
-	
-# Switching to downloaded themes by setting env vars.
-export GTK_THEME="Adwaita-dark"
-export QT_QPA_PLATFORMTHEME=qt5ct
+
+# Sourcing bash to apply downloaded theme to QT via environment vars
+source $HOME/dora-ros/scripts/bashrcExtension.bash
+
+# Gsettings to apply gtk theme and icon
+gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
+gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'
+

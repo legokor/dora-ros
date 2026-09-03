@@ -23,15 +23,15 @@ RUN apt-get update && \
 
 # Copying repos
 # Warning: This experiment dockerfile will NOT contain the rplidar repo unless previously cloned
-COPY --chmod=755 .. .
+COPY --chmod=755 .. ./dora-ros
 
 # make our lives easier
-RUN echo "source /root/scripts/bashrcExtension.bash" >> .bashrc
+RUN echo "source $HOME/dora-ros/scripts/bashrcExtension.bash" >> .bashrc
 
 # starts controller with rplidar
 FROM base AS dora
 
-CMD /bin/bash -l -c "${WORK_DIR}/dora-ros/scripts/build-and-run.sh"
+CMD /bin/bash -l -c "$HOME/dora-ros/scripts/build-and-run.sh"
 
 FROM base AS dev
 

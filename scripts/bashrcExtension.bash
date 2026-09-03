@@ -23,3 +23,7 @@ PS1="${GREEN}\t ${CYAN}\u${NC}@${YELLOW}\h${NC} ${BLUE}\w${NC} ${GREEN}\$${NC} "
 
 # Workspace setup
 source /opt/ros/kilted/setup.bash
+
+# Setting themes
+export GTK_THEME="Adwaita-dark"
+export QT_QPA_PLATFORMTHEME=qt5ct

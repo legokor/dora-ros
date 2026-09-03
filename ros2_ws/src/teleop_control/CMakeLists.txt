@@ -4,6 +4,10 @@ project(teleop_control)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Convencience var
+set(exec_name "keyControl")
+set(script_name "teleopKey")
+
 # Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
@@ -15,29 +19,39 @@ include_directories(include)
 include_directories(launch)
 
 # Generating messages
+# It creates a new target to compile messages to.
+# That's why it needs a different name
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/KeyInputMsg.msg"
   "msg/MouseInputMsg.msg"
-  )
+)
+
+ament_export_dependencies(rosidl_default_runtime)
 
 # Create the executable
-add_executable(key_control src/keyMovement.cpp)
+add_executable(${exec_name} src/keyMovement.cpp)
+
+# Support for creating and using interfaces in single packages
+rosidl_get_typesupport_target(cpp_typesupport_target
+  ${PROJECT_NAME} rosidl_typesupport_cpp)
 
 # Link against necessary libraries
-ament_target_dependencies(key_control rclcpp geometry_msgs)
+target_link_libraries(${exec_name}
+  rclcpp::rclcpp
+  geometry_msgs::geometry_msgs
+  "${cpp_typesupport_target}"
+)
 
 # Install
-install(TARGETS key_control DESTINATION lib/${CMAKE_PROJECT_NAME})
+install(TARGETS ${exec_name} DESTINATION lib/${PROJECT_NAME})
 
-install(DIRECTORY launch images DESTINATION share/${CMAKE_PROJECT_NAME}/)
+install(DIRECTORY launch images DESTINATION share/${PROJECT_NAME}/)
 
 install(PROGRAMS
   scripts/teleopKey.py
   DESTINATION lib/${PROJECT_NAME}
-  RENAME teleopKey
+  RENAME ${script_name}
 )
-
-ament_export_dependencies(rosidl_default_runtime)
 
 # Ament package
 ament_package()

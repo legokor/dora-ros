@@ -2,8 +2,10 @@ build/
 log/
 install/
 .vscode/
+.cache/
 
-dora-ros.geany
+compile_commands.json
+*.geany
 /ros2_ws/src/rplidar_ros/
 rplidar_ros/
 

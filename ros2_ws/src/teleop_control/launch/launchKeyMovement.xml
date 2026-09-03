@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-    <node pkg="teleop_control" exec="teleop_key" name="teleop_key" output="screen">
+    <node pkg="teleop_control" exec="teleopKey" name="teleopKey" output="screen">
     </node>
 
-    <node pkg="teleop_control" exec="keyMovement" name="drift_control" output="screen">
+    <node pkg="teleop_control" exec="keyControl" name="keyControl" output="screen">
         <param name="deaccel" value="0.0025"/>
     </node>
 </launch>

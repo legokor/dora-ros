@@ -4,7 +4,7 @@ services:
     
     # Build settings
     build: 
-      context: ..
+      context: .. # Project root dir
       target: dev
       dockerfile: docker/local-test.Dockerfile
       
@@ -23,11 +23,15 @@ services:
       - dev-settings-vol:/root
       - dev-var-vol:/var
     
-    # Environment variables for GUI app use.
+    # Environment variables for GUI app use and saving app data.
     environment:
       - DISPLAY=${DISPLAY}
-      - XDG_RUNTIME_DIR=/tmp/runtime-root
+      - HOME=/root
       - XDG_CONFIG_HOME=/root/.config
+      - XDG_CACHE_HOME=/root/.cache
+      - XDG_DATA_HOME=/root/.local/share
+      - XDG_STATE_HOME=/root/.local/state
+      - XDG_RUNTIME_DIR=/tmp/runtime-root
       - LIBGL_ALWAYS_SOFTWARE=0
       - NO_AT_BRIDGE=1
 
@@ -40,7 +44,7 @@ services:
     
     # Build settings
     build: 
-      context: ..
+      context: .. # Project root dir
       target: dora
       dockerfile: docker/local-test.Dockerfile
 

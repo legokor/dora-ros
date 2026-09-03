@@ -4,12 +4,13 @@
 #include "rclcpp/node.hpp"
 #include "tf2_ros/transform_broadcaster.hpp"
 #include "tf2/LinearMath/Quaternion.hpp"
-
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "nav_msgs/msg/odometry.hpp"
+
+#include <string>
 
 // Robot specific namespace
 namespace dora {
