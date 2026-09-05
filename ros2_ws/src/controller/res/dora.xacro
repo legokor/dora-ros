@@ -188,8 +188,6 @@
     <!-- Wheels -->
     <xacro:macro name="omniwheel" params="idx">
         <xacro:property name="angle" value='${pi / 6 + 2 * pi * idx / 3}' />
-        <xacro:property name="wheel_dist"
-            value="${axle_to_center_dist}" />
 
         <joint name="wheel_joint_${idx}" type="fixed">
             <parent link="wheel_axle_${idx}" />
@@ -221,14 +219,6 @@
 
                 <material name="metal" />
             </visual>
-
-            <collision>
-                <origin rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
-
-                <geometry>
-                    <cylinder radius="${wheel_diameter / 2}" length="${wheel_width}" />
-                </geometry>
-            </collision>
         </link>
 
         <link name="wheel_${idx}">
@@ -243,7 +233,7 @@
             </visual>
 
             <collision>
-                <origin rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
+                <origin xyz="0 0 -${wheel_width/2}" />
 
                 <geometry>
                     <cylinder radius="${wheel_diameter / 2}" length="${wheel_width}" />
