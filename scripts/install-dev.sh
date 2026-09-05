@@ -29,7 +29,7 @@ packages=(
 	geany-plugins   # Plugins like LSP client
 	thunar   # File explorer
 	alacritty   # Terminal emulator
-	fastfetch # EXTREMELY IMPORTANT
+	fastfetch  # EXTREMELY IMPORTANT
 	
 	# GUI tools and themes for setting Rviz outlook you have to manually set the theme in qt5ct/qt6ct
 	qt5ct   # Qt5 Control panel
@@ -43,6 +43,9 @@ packages=(
 	# Language servers for code editing
 	python3-pylsp
 	clangd-20
+	
+	# Sound dependencies
+	pipewire-alsa pipewire libasound2-dev alsa-utils
 )
 
 # Installing packages

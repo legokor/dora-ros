@@ -19,10 +19,6 @@ from teleop_control.msg import MouseInputMsg
 # into ROS2 messages using Pygame.
 class TeleopKeyPublisher(Node):
 
-    # Msg variables (Generating only once is enough)
-    Mouse_msg = MouseInputMsg()
-    Key_msg = KeyInputMsg()
-
     def __init__(self):
         # Node and publisher decleration
         super().__init__("teleop_key_publisher")
@@ -32,6 +28,10 @@ class TeleopKeyPublisher(Node):
                             MouseInputMsg, "mouse_teleop_control", 10)
         self.publishRate = 1/10    # 1/Hz = sec
         # Due to the program's logic, the actual publish rate is a bit slower
+        
+        # Msg variables (Generating only once is enough)
+        self.Mouse_msg = MouseInputMsg()
+        self.Key_msg = KeyInputMsg()
 
     # Transforms pygame keyboard input to KeyInputMsg and publishes it
     def onKeyPressed(self, keyEvent):
@@ -50,44 +50,45 @@ class TeleopKeyPublisher(Node):
 
     # Transforms pygame mouse input to MouseInputMsg and publishes it
     def onMousePressed(self, mouseEvent):
-        # Generating msg
-        msg = MouseInputMsg()
 
         # Selecting pressed mouse buttons and mousewheel scroll
         match mouseEvent.button:
             case 1:
-                msg.mouse_left = True
+                self.Mouse_msg.mouse_left = True
             case 2:
-                msg.mouse_middle = True
+                self.Mouse_msg.mouse_middle = True
             case 3:
-                msg.mouse_right = True
+                self.Mouse_msg.mouse_right = True
             case 4:
-                msg.mouse_wheel_down = True
+                self.Mouse_msg.mouse_wheel_down = True
             case 5:
-                msg.mouse_wheel_up = True
+                self.Mouse_msg.mouse_wheel_up = True
 
         # Publishing
-        self.mousePublisher.publish(msg)
+        self.mousePublisher.publish(self.Mouse_msg)
+        
+        # Resetting mouse wheel events, because they can't be lifted like other buttons
+        match mouseEvent.button:
+            case 4:
+                self.Mouse_msg.mouse_wheel_down = False
+            case 5:
+                self.Mouse_msg.mouse_wheel_up = False
 
     def onMouseLifted(self, mouseEvent):
-        # Generating msg
-        msg = MouseInputMsg()
 
-        # Selecting pressed mouse buttons and mousewheel scroll
+        # Selecting pressed mouse buttons
+        # The movement of the mouse wheel triggers both mouse up and down events
+        # simultaneously, so using it in this switch-case is redundant
         match mouseEvent.button:
             case 1:
-                msg.mouse_left = True
+                self.Mouse_msg.mouse_left = False
             case 2:
-                msg.mouse_middle = True
+                self.Mouse_msg.mouse_middle = False
             case 3:
-                msg.mouse_right = True
-            case 4:
-                msg.mouse_wheel_down = True
-            case 5:
-                msg.mouse_wheel_up = True
+                self.Mouse_msg.mouse_right = False
 
         # Publishing
-        self.mousePublisher.publish(msg)
+        self.mousePublisher.publish(self.Mouse_msg)
 
 
 def main(args=None):
@@ -120,6 +121,8 @@ def main(args=None):
                     teleop_node.onKeyPressed(event)
                 case pygame.MOUSEBUTTONDOWN:
                     teleop_node.onMousePressed(event)
+                case pygame.MOUSEBUTTONUP:
+                    teleop_node.onMouseLifted(event)
 
         # Allowing rclpy to update data
         rclpy.spin_once(teleop_node, timeout_sec=0)

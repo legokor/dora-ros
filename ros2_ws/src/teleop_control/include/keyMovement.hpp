@@ -29,7 +29,7 @@ class KeyMovementNode : public Node {
     double absSpeedLimit = declare_parameter<double>("absSpeedLimit", 1.0);
     double absAngLimit = declare_parameter<double>("absAngLimit", 1.0);
     double linAccel = declare_parameter<double>("linAccel", 0.1);
-    double angAccel = declare_parameter<double>("angAccel", 0.1);
+    double angAccel = declare_parameter<double>("angAccel", 0.1); // radian
     double deaccel = declare_parameter<double>("deaccel", 0.01);
     
     // Variables

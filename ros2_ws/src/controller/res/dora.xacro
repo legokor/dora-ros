@@ -2,12 +2,13 @@
 <robot name="dora" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <!-- Original body height = 0.103. Changed due to STL height being smaller than actual-->
-    <xacro:property name="body_height" value="0.090" />
-    <xacro:property name="body_to_floor" value="0.012" />
+    <xacro:property name="body_height" value="0.10" />
+    <xacro:property name="body_to_floor" value="0.00" />
 
-    <xacro:property name="axle_to_center_dist" value="0.180" />
-    <xacro:property name="wheel_axle_length" value="0.025" />
-    <xacro:property name="wheel_diameter" value="0.056" />
+    <xacro:property name="axle_to_center_dist" value="0.175" />
+    <xacro:property name="wheel_axle_length" value="0.013" />
+    <xacro:property name="wheel_axle_radius" value="0.01" />
+    <xacro:property name="wheel_diameter" value="0.05" />
     <xacro:property name="wheel_width" value="0.023" />
 
     <xacro:property name="lidar_distance" value="0.04" />
@@ -15,18 +16,20 @@
     <xacro:property name="lidar_width" value="0.075" />
 
     <xacro:property name="lidar_rod_to_center_dist" value="0.030" />
-    <xacro:property name="lidar_rod_height" value="0.035" />
+    <xacro:property name="lidar_rod_height" value="0.02" />
     <xacro:property name="lidar_rod_size" value="${lidar_rod_height} 0.006 0.006" />
+    <xacro:property name="lidar_rod_to_base_dist" value="0.075" />
 
     <xacro:property name="wall_to_center_dist" value="0.115" />
     <xacro:property name="wall_size" value="0.090 0.270 0.003" />
 
     <xacro:property name="camera_to_center_dist" value="0.090" />
     <xacro:property name="camera_dist_between" value="0.060" />
-    <xacro:property name="camera_elevation" value="0.010" />
-    <xacro:property name="camera_size" value="0.025 0.100 0.075" />
+    <xacro:property name="camera_elevation" value="0.007" />
+    <xacro:property name="camera_size" value="0.025 0.100 0.06" />
 
     <xacro:property name="mesh_path" value="package://controller/res/dora_vaz.stl" />
+    <xacro:property name="stl_offset" value="0.014" />
 
     <!-- TODO: scale down mesh in stl -->
     <xacro:property name="mesh_scale" value="0.001 0.001 0.001" />
@@ -67,7 +70,7 @@
             <parent link="base_link"/>
             <child link="wall_link_${idx}"/>
             <origin 
-                xyz="${cos(angle) * wall_to_center_dist} ${sin(angle) * wall_to_center_dist} ${body_to_floor}" 
+                xyz="${cos(angle) * wall_to_center_dist} ${sin(angle) * wall_to_center_dist} ${stl_offset}" 
                 rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" 
             />
         </joint>
@@ -79,7 +82,7 @@
         <!-- No need for new links to contain the rods -->
             <visual>
                 <origin
-                    xyz="${cos(angle) * lidar_rod_to_center_dist} ${sin(angle) * lidar_rod_to_center_dist} ${-lidar_rod_height/2}"
+                    xyz="${cos(angle) * lidar_rod_to_center_dist} ${sin(angle) * lidar_rod_to_center_dist} ${lidar_rod_height/2}"
                     rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}"
                 />
 
@@ -113,7 +116,14 @@
 
 
     <!-- Base footprint -->
-    <link name="base_footprint"/>
+    <link name="base_footprint">
+        <visual>
+            <geometry>
+                <cylinder length="0.005" radius="0.005"/>
+            </geometry>
+            <material name="red"/>
+        </visual>
+    </link>
 
     <joint name="base_footprint_joint" type="fixed">
         <parent link="base_footprint"/>
@@ -122,8 +132,8 @@
     </joint>
 
 
-    <!-- Lidar link -->
-    <link name="base_lidar">
+    <!-- Lidar head -->
+    <link name="lidar_head">
         <visual>
             <origin xyz="0 0 ${lidar_height / 2}"/>
 
@@ -134,10 +144,6 @@
             <material name="black"/>
         </visual>
 
-        <xacro:lidar_rod idx="0" />
-        <xacro:lidar_rod idx="1" />
-        <xacro:lidar_rod idx="2" />
-
         <collision>
             <origin xyz="0 0 ${lidar_height / 2}" rpy="0 0 ${pi / 3}" />
 
@@ -147,47 +153,93 @@
         </collision>
     </link>
 
-    <!-- Laser frame for Lidar -->
-    <link name="laser"></link>
-
-    <joint name="laser_joint" type="fixed">
-        <parent link="base_lidar"/>
-        <child link="laser"/>
-    </joint>
-
     <!-- Lidar motor -->
     <joint name="lidar_joint" type="continuous">
-        <parent link="base_link" />
-        <child link="base_lidar" />
-        <origin xyz="0 0 ${body_to_floor + body_height/2 + lidar_distance}" />
+        <parent link="lidar_rods" />
+        <child link="lidar_head" />
+        <origin
+            xyz="0 0 ${lidar_rod_height}" 
+        />
+        <axis xyz="0 0 ${pi/2}">
     </joint>
 
+    <!-- Lidar rods -->>
+    <link name="lidar_rods">
+        <xacro:lidar_rod idx="0" />
+        <xacro:lidar_rod idx="1" />
+        <xacro:lidar_rod idx="2" />
+    </link>
 
-    <!-- Wheel macro -->
+    <!-- Lidar rods' joint -->
+     <joint name="rod_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="lidar_rods"/>
+        <origin xyz="0 0 ${body_height/2 + stl_offset}"/>
+    </joint>
+
+    <!-- Laser frame for SLAM -->
+    <link name="laser_frame"></link>
+
+    <joint name="laser_joint" type="fixed">
+        <parent link="lidar_head"/>
+        <child link="laser_frame"/>
+    </joint>
+
+    <!-- Wheels -->
     <xacro:macro name="omniwheel" params="idx">
         <xacro:property name="angle" value='${pi / 6 + 2 * pi * idx / 3}' />
         <xacro:property name="wheel_dist"
-            value="${axle_to_center_dist + wheel_axle_length}" />
+            value="${axle_to_center_dist}" />
 
-        <joint name="wheel_joint_${idx}" type="continuous">
-            <parent link="base_link" />
+        <joint name="wheel_joint_${idx}" type="fixed">
+            <parent link="wheel_axle_${idx}" />
             <child link="wheel_${idx}" />
             <origin
-                xyz="${cos(angle) * wheel_dist} ${sin(angle) * wheel_dist} ${-wheel_diameter/2}"
+                xyz="0 0 ${-wheel_axle_length}"
                 rpy="0 0 0"
             />
-            <axis xyz="${cos(angle)} ${sin(angle)} 0" />
+            <axis xyz="0 0 0" />
         </joint>
 
-        <link name="wheel_${idx}">
+        <joint name="wheel_axle_joint_${idx}" type="continuous">
+            <parent link="base_link" />
+            <child link="wheel_axle_${idx}" />
+            <origin
+                xyz="${cos(angle) * axle_to_center_dist} ${sin(angle) * axle_to_center_dist} ${-wheel_diameter/2}"
+                rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}"
+            />
+            <axis xyz="0 0 ${pi/2}"/>
+        </joint>
+
+        <link name="wheel_axle_${idx}">
             <visual>
+                <origin xyz="0 0 ${-wheel_axle_length/2}"/>
+
+                <geometry>
+                    <cylinder radius="${wheel_axle_radius}" length="${wheel_axle_length}" />
+                </geometry>
+
+                <material name="metal" />
+            </visual>
+
+            <collision>
                 <origin rpy="${0.5 * pi} ${0.5 * pi} ${angle - 0.5 * pi}" />
 
                 <geometry>
                     <cylinder radius="${wheel_diameter / 2}" length="${wheel_width}" />
                 </geometry>
+            </collision>
+        </link>
 
-                <material name="metal" />
+        <link name="wheel_${idx}">
+            <visual>
+                <origin xyz="0 0 -${wheel_width/2}" />
+
+                <geometry>
+                    <cylinder radius="${wheel_diameter / 2}" length="${wheel_width}" />
+                </geometry>
+
+                <material name="black" />
             </visual>
 
             <collision>
@@ -209,7 +261,7 @@
             <parent link="base_link" />
             <child link="camera_${idx}" />
             <origin
-                xyz="${cos(angle) * camera_to_center_dist} ${sin(angle) * camera_to_center_dist} ${body_to_floor+camera_elevation}"
+                xyz="${cos(angle) * camera_to_center_dist} ${sin(angle) * camera_to_center_dist} ${stl_offset+camera_elevation}"
                 rpy="0 0 0"
             />
             <axis xyz="${cos(angle)} ${sin(angle)} 0" />
