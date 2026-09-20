@@ -21,6 +21,7 @@ packages=(
     ros-${ROS_DISTRO}-rviz-default-plugins   # Helpful plugins
     ros-${ROS_DISTRO}-rqt   # Analytics panel for ROS data
     ros-${ROS_DISTRO}-rqt-common-plugins  # Better logging, settings etc...
+    ros-${ROS_DISTRO}-joint-state-publisher-gui  # Better logging, settings etc...
     # rplidar package is not maintained :/ 
     # ros-${ROS_DISTRO}-rplidar-ros
     

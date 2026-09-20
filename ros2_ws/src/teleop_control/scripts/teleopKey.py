@@ -28,16 +28,19 @@ class TeleopKeyPublisher(Node):
                             MouseInputMsg, "mouse_teleop_control", 10)
         self.publishRate = 1/10    # 1/Hz = sec
         # Due to the program's logic, the actual publish rate is a bit slower
-        
+
         # Msg variables (Generating only once is enough)
         self.Mouse_msg = MouseInputMsg()
         self.Key_msg = KeyInputMsg()
 
+        # Helper for keys. Uses hash sets
+        self.Key_msg_set = set()
+
     # Transforms pygame keyboard input to KeyInputMsg and publishes it
     def onKeyPressed(self, keyEvent):
 
-        # Selecting pressed key
-        self.Key_msg.key = keyEvent.key
+        # Inserting pressed key into list
+        self.Key_msg_set.add(keyEvent.key)
 
         # Selecting modifier keys
         # event.mod is a bitmask and each bit preresents a modifier key.
@@ -46,49 +49,72 @@ class TeleopKeyPublisher(Node):
         self.Key_msg.alt = bool(keyEvent.mod & pygame.KMOD_ALT)
 
         # Publishing
+        self.Key_msg.keys = list(self.Key_msg_set)
+        self.keyPublisher.publish(self.Key_msg)
+
+    # Reverts keyboard message after lifting key
+    def onKeyLifted(self, keyEvent):
+
+        # Removing key from list
+        self.Key_msg_set.remove(keyEvent.key)
+
+        # Selecting modifier keys
+        # event.mod is a bitmask and each bit preresents a modifier key.
+        # Leaving this here because there might be unintented behavior
+        # if not reverted
+        self.Key_msg.shift = bool(keyEvent.mod & pygame.KMOD_SHIFT)
+        self.Key_msg.ctrl = bool(keyEvent.mod & pygame.KMOD_CTRL)
+        self.Key_msg.alt = bool(keyEvent.mod & pygame.KMOD_ALT)
+
+        # Publishing
+        self.Key_msg.keys = list(self.Key_msg_set)
         self.keyPublisher.publish(self.Key_msg)
 
     # Transforms pygame mouse input to MouseInputMsg and publishes it
     def onMousePressed(self, mouseEvent):
+        # Generating msg
+        msg = MouseInputMsg()
 
         # Selecting pressed mouse buttons and mousewheel scroll
         match mouseEvent.button:
             case 1:
-                self.Mouse_msg.mouse_left = True
+                msg.mouse_left = True
             case 2:
-                self.Mouse_msg.mouse_middle = True
+                msg.mouse_middle = True
             case 3:
-                self.Mouse_msg.mouse_right = True
+                msg.mouse_right = True
             case 4:
-                self.Mouse_msg.mouse_wheel_down = True
+                msg.mouse_wheel_down = True
             case 5:
-                self.Mouse_msg.mouse_wheel_up = True
+                msg.mouse_wheel_up = True
 
         # Publishing
-        self.mousePublisher.publish(self.Mouse_msg)
-        
-        # Resetting mouse wheel events, because they can't be lifted like other buttons
+        self.mousePublisher.publish(msg)
+
+        # Reverting mouse wheel immediately (they can't be held)
         match mouseEvent.button:
             case 4:
-                self.Mouse_msg.mouse_wheel_down = False
+                msg.mouse_wheel_down = False
             case 5:
-                self.Mouse_msg.mouse_wheel_up = False
+                msg.mouse_wheel_up = False
 
+    # Reverts Mouse state upon lifting back to false
     def onMouseLifted(self, mouseEvent):
+        # Generating msg
+        msg = MouseInputMsg()
 
         # Selecting pressed mouse buttons
-        # The movement of the mouse wheel triggers both mouse up and down events
-        # simultaneously, so using it in this switch-case is redundant
+        # (mouse wheel scrolling can't be lifted)
         match mouseEvent.button:
             case 1:
-                self.Mouse_msg.mouse_left = False
+                msg.mouse_left = False
             case 2:
-                self.Mouse_msg.mouse_middle = False
+                msg.mouse_middle = False
             case 3:
-                self.Mouse_msg.mouse_right = False
+                msg.mouse_right = False
 
         # Publishing
-        self.mousePublisher.publish(self.Mouse_msg)
+        self.mousePublisher.publish(msg)
 
 
 def main(args=None):
@@ -119,10 +145,12 @@ def main(args=None):
                     rclpy.try_shutdown()
                 case pygame.KEYDOWN:
                     teleop_node.onKeyPressed(event)
+                case pygame.KEYUP:
+                    teleop_node.onKeyLifted(event)
                 case pygame.MOUSEBUTTONDOWN:
                     teleop_node.onMousePressed(event)
                 case pygame.MOUSEBUTTONUP:
-                    teleop_node.onMouseLifted(event)
+                    teleop_node.onMousePressed(event)
 
         # Allowing rclpy to update data
         rclpy.spin_once(teleop_node, timeout_sec=0)

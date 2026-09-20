@@ -18,6 +18,7 @@ services:
     # Also mounting volumes 
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/tmp/${WAYLAND_DISPLAY}
       - dev-vol:/opt/ros/kilted
       - dev-tools-vol:/usr
       - dev-settings-vol:/root
@@ -26,12 +27,14 @@ services:
     # Environment variables for GUI app use and saving app data.
     environment:
       - DISPLAY=${DISPLAY}
+      - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
       - HOME=/root
+      - QT_QPA_PLATFORM=wayland
       - XDG_CONFIG_HOME=/root/.config
       - XDG_CACHE_HOME=/root/.cache
       - XDG_DATA_HOME=/root/.local/share
       - XDG_STATE_HOME=/root/.local/state
-      - XDG_RUNTIME_DIR=/tmp/runtime-root
+      - XDG_RUNTIME_DIR=/tmp
       - LIBGL_ALWAYS_SOFTWARE=0
       - NO_AT_BRIDGE=1
 

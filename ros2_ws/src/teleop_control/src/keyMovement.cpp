@@ -19,15 +19,17 @@ KeyMovementNode::KeyMovementNode() : Node("key_movement_node") {
 // Reacts to key input and changes the robot's speed accordingly
 void KeyMovementNode::ChangeSpeed(const KeyMsg::SharedPtr& msg) {
 	// Reacting to key input
-	switch(msg->key) {
-		case 'w': linSpeed += linAccel; break;
-		case 'a': strafeSpeed -= linAccel; break;
-		case 's': linSpeed -= linAccel; break;
-		case 'd': strafeSpeed += linAccel; break;
-		case 'q': angSpeed -= angAccel; break;
-		case 'e': angSpeed += angAccel; break;
+	for (auto key_code : msg->keys) {
+		switch(key_code) {
+			case 'w': linSpeed += linAccel; break;
+			case 'a': strafeSpeed -= linAccel; break;
+			case 's': linSpeed -= linAccel; break;
+			case 'd': strafeSpeed += linAccel; break;
+			case 'q': angSpeed -= angAccel; break;
+			case 'e': angSpeed += angAccel; break;
+		}
 	}
-    
+	
     // Clamping to limit
     linSpeed = std::clamp(linSpeed, -absSpeedLimit, absSpeedLimit);
 	strafeSpeed = std::clamp(strafeSpeed, -absSpeedLimit, absSpeedLimit);
@@ -37,14 +39,19 @@ void KeyMovementNode::ChangeSpeed(const KeyMsg::SharedPtr& msg) {
 // Publishes speed data for the robot controller and deacceleretes the robot's speed
 void KeyMovementNode::PublishSpeed() {
     // Deacceleration
-    linSpeed += linSpeed < 0 ? deaccel : -deaccel;
-    strafeSpeed += strafeSpeed < 0 ? deaccel : -deaccel;
-    angSpeed += angSpeed < 0 ? deaccel : -deaccel;
+    linSpeed /= deaccel;
+    strafeSpeed /= deaccel;
+    angSpeed /= deaccel;
     
     // Clearing data to stop the wheels
-    if (abs(linSpeed) < deaccel*4) linSpeed = 0.0;
-    if (abs(strafeSpeed) < deaccel*4) strafeSpeed = 0.0;
-    if (abs(angSpeed) < deaccel*4) angSpeed = 0.0;
+    if (abs(linSpeed) < 0.001) linSpeed = 0.0;
+    if (abs(strafeSpeed) < 0.001) strafeSpeed = 0.0;
+    if (abs(angSpeed) < 0.001) angSpeed = 0.0;
+    
+    // Clamping to prevent UART errors
+    linSpeed = std::clamp(linSpeed, -absSpeedLimit, absSpeedLimit);
+	strafeSpeed = std::clamp(strafeSpeed, -absSpeedLimit, absSpeedLimit);
+    angSpeed = std::clamp(angSpeed, -absAngLimit, absAngLimit);
     
     // Generating message
 	auto new_msg = Twist();

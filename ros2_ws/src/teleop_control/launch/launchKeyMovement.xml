@@ -4,6 +4,6 @@
     </node>
 
     <node pkg="teleop_control" exec="keyControl" name="keyControl" output="screen">
-        <param name="deaccel" value="0.0025"/>
+        <param name="deaccel" value="1.075"/>
     </node>
 </launch>

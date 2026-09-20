@@ -157,10 +157,8 @@
     <joint name="lidar_joint" type="continuous">
         <parent link="lidar_rods" />
         <child link="lidar_head" />
-        <origin
-            xyz="0 0 ${lidar_rod_height}" 
-        />
-        <axis xyz="0 0 ${pi/2}">
+        <origin xyz="0 0 ${lidar_rod_height}" />
+        <axis xyz="0 0 ${pi/2}" />
     </joint>
 
     <!-- Lidar rods -->>
