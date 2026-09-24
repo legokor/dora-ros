@@ -13,14 +13,6 @@ WORKDIR root
 RUN echo "Europe/Budapest" > /etc/timezone
 RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
 
-# installing common programs
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    \
-    apt-get install -y \
-    software-properties-common nano curl btop tree unzip neovim \
-    python3 python3-pip
-
 # Copying repos
 # Warning: This experiment dockerfile will NOT contain the rplidar repo unless previously cloned
 COPY --chmod=755 .. ./dora-ros

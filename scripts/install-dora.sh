@@ -5,6 +5,8 @@
 
 # ROS packages and dev tools
 apt install -y \
+	software-properties-common nano curl btop tree unzip neovim \
+    python3 python3-pip
     python3-rosdep \  # automatic ROS dependency installer
     ros-dev-tools \  # Dev tools
     ros-${ROS_DISTRO}-xacro \  # XML macro runner for URDF files.

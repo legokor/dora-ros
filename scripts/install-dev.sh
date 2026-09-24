@@ -10,6 +10,8 @@ add-apt-repository -y ppa:zhangsongcui3371/fastfetch  # Can't live without fastf
 
 packages=(
 	# ROS packages and dev tools	
+	software-properties-common nano curl btop tree unzip neovim
+    python3 python3-pip
 	python3-rosdep  # automatic ROS dependency installer
     ros-dev-tools   # Dev tools
     ros-${ROS_DISTRO}-xacro   # XML macro runner for URDF files.
