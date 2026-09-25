@@ -1,3 +1,4 @@
+version: "3"
 services:
   dev:
     container_name: dev
@@ -29,7 +30,6 @@ services:
       - DISPLAY=${DISPLAY}
       - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
       - HOME=/root
-      - QT_QPA_PLATFORM=wayland
       - XDG_CONFIG_HOME=/root/.config
       - XDG_CACHE_HOME=/root/.cache
       - XDG_DATA_HOME=/root/.local/share

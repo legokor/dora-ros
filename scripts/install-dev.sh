@@ -23,7 +23,7 @@ packages=(
     ros-${ROS_DISTRO}-rviz-default-plugins   # Helpful plugins
     ros-${ROS_DISTRO}-rqt   # Analytics panel for ROS data
     ros-${ROS_DISTRO}-rqt-common-plugins  # Better logging, settings etc...
-    ros-${ROS_DISTRO}-joint-state-publisher-gui  # Better logging, settings etc...
+    ros-${ROS_DISTRO}-joint-state-publisher-gui   # Allows manual joint configuration
     # rplidar package is not maintained :/ 
     # ros-${ROS_DISTRO}-rplidar-ros
     
@@ -35,6 +35,8 @@ packages=(
 	fastfetch  # EXTREMELY IMPORTANT
 	
 	# GUI tools and themes for setting Rviz outlook you have to manually set the theme in qt5ct/qt6ct
+	fuzzel  # Application launcher for files with .desktop entries
+	apwal   # Application launcher which allows you to wire commands to launch icons easily 
 	qt5ct   # Qt5 Control panel
 	qt6ct   # Qt6 Control panel
 	gnome-themes-extra-data   # Adwaita-dark theme
