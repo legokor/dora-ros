@@ -28,6 +28,8 @@
     <xacro:property name="camera_elevation" value="0.007" />
     <xacro:property name="camera_size" value="0.025 0.100 0.06" />
 
+    <!-- URDF preview defaults package://cotroller to the currently opened folder.
+     Insert this path after it and before res when you /ros2_ws/src/controller -->>
     <xacro:property name="mesh_path" value="package://controller/res/dora_vaz.stl" />
     <xacro:property name="stl_offset" value="0.014" />
 
