@@ -6,9 +6,10 @@ services:
     # Build settings
     build: 
       context: .. # Project root dir
-      target: dev
-      dockerfile: docker/local-test.Dockerfile
-      
+      dockerfile: docker/LocalBuild.Dockerfile
+      args:
+        BUILD_TARGET: dev
+
     tty: true
     
     # Network settings
@@ -48,8 +49,9 @@ services:
     # Build settings
     build: 
       context: .. # Project root dir
-      target: dora
-      dockerfile: docker/local-test.Dockerfile
+      dockerfile: docker/LocalBuild.Dockerfile
+      args:
+        BUILD_TARGET: dev
 
     tty: true
 

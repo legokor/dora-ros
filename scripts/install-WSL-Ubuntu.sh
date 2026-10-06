@@ -1,17 +1,21 @@
 #!/bin/bash
 
-## This script installs runtime packages outside container building
-# Volumes keep downloaded packages, so this script should be ran once when creating new volumes
-# It should take about 10 mins to finish over wifi.
+## Helper script to install ros2 on native ubuntu and wsl
+# Don't call with sudo because the ROS_DISTRO env-var will be set to root instead of the user
+
+# Ros version:
+export ROS_DISTRO=kilted
 
 # Adding Personal Package Archives due to Ubuntu's repos lacking behind
-add-apt-repository -y ppa:ubuntuhandbook1/geany  # For built in color themes
-add-apt-repository -y ppa:zhangsongcui3371/fastfetch  # Can't live without fastfetch.
+sudo add-apt-repository -y ppa:zhangsongcui3371/fastfetch  # Can't live without fastfetch.
+
+# In case they are missing.
+basePackages=(
+	software-properties-common nano curl btop tree unzip
+    python3 python3-pip
+)
 
 packages=(
-	# ROS packages and dev tools	
-	software-properties-common nano curl btop tree unzip neovim
-    python3 python3-pip
 	python3-rosdep  # automatic ROS dependency installer
     ros-dev-tools   # Dev tools
     ros-${ROS_DISTRO}-desktop   # Ros2 for developtment
@@ -29,11 +33,7 @@ packages=(
     # rplidar package is not maintained :/ 
     # ros-${ROS_DISTRO}-rplidar-ros
     
-    # Development tools
-    geany   # Lightweight GUI code editor
-	geany-plugins   # Plugins like LSP client
-	thunar   # File explorer
-	alacritty   # Terminal emulator
+    # Development tools (VsCode should connect automatically to WSL)
 	fastfetch  # EXTREMELY IMPORTANT
 	
 	# GUI tools and themes for setting Rviz outlook you have to manually set the theme in qt5ct/qt6ct
@@ -44,26 +44,27 @@ packages=(
 	gnome-themes-extra-data   # Adwaita-dark theme
 	adwaita-qt   # Matching qt5 theme for Adwaita-dark
 	adwaita-qt6  # Matching qt6 theme for Adwaita-dark
-	papirus-icon-theme  # Nice looking icon theme
-	dbus dbus-x11 dconf-service dconf-cli at-spi2-core x11-utils # Various GUI dependencies
-	
-	# Language servers for code editing
-	python3-pylsp
-	clangd-20
-	
-	# Sound dependencies
-	pipewire-alsa pipewire libasound2-dev alsa-utils
 )
 
-# Installing packages
-apt-get update
-apt-get upgrade -y
-apt-get install -y "${packages[@]}"
+# Installing base packages
+sudo apt update
+sudo apt upgrade -y
+sudo apt install -y "${basePackages[@]}"
+
+# Setting up ros install:
+sudo add-apt-repository universe
+sudo apt update && sudo apt install curl -y
+export ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F'"' '{print $4}')
+curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo ${UBUNTU_CODENAME:-${VERSION_CODENAME}})_all.deb"
+sudo dpkg -i /tmp/ros2-apt-source.deb
+
+# Installing
+sudo apt update
+sudo apt install ros-dev-tools "${packages[@]}"
 
 # Sourcing bash to apply downloaded theme to QT via environment vars
 source $HOME/dora-ros/scripts/bashrcExtension.bash
 
 # Gsettings to apply gtk theme and icon
 gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
-gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'
 
