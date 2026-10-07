@@ -13,10 +13,6 @@ WORKDIR /root
 RUN echo "Europe/Budapest" > /etc/timezone
 RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime
 
-# Copying repos
-# Warning: This experiment dockerfile will NOT contain the rplidar repo unless previously cloned
-COPY .. ./dora-ros
-
 # Make our lives easier
 RUN echo "source $HOME/dora-ros/scripts/bashrcExtension.bash" >> .bashrc
 

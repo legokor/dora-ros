@@ -2,11 +2,23 @@
 
 # Run from project root directory with "docker/launch-doracon.sh" !
 
-# If you want to force rebuild, run the script with -f flag
-if [[ "$1" == "-f" ]]; then
-	docker-compose -f docker/docker-compose.yml up -d --build dora
+## Flags
+# -f : force rebuild container
+
+rebuild=false
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -f) rebuild=true;;
+    *) echo "Unknown flag: $1" >&2 ;;
+  esac
+  shift
+done
+
+# Compose up with -d flag to run in background
+if $rebuild; then
+  docker-compose -f docker/docker-compose.yml up --build -d dora
 else
-	docker-compose -f docker/docker-compose.yml up -d dora
+  docker-compose -f docker/docker-compose.yml up -d dora
 fi
 
 # Docker compose up builds and starts the container

@@ -17,8 +17,9 @@ services:
     ipc: host
 
     # Mounting X11 socket and sharing host dbus for GUI apps
-    # Also mounting volumes 
+    # Also mounting volumes and project
     volumes:
+      - ..:/root/dora-ros
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/tmp/${WAYLAND_DISPLAY}
       - dev-vol:/opt/ros/kilted
@@ -59,9 +60,10 @@ services:
     network_mode: host
     ipc: host
 
-    # Storage settings
+    # Mounting volumes and project
     volumes:
       - dora-vol:/opt/ros/kilted
+      - ..:/root/dora-ros
 
     # Mounting Lidar and UART adapter 
     devices:
