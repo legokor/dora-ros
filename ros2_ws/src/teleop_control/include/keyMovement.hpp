@@ -7,8 +7,6 @@
 #include <cmath>
 
 using namespace rclcpp;
-using KeyMsg = teleop_control::msg::KeyInputMsg;
-using Twist = geometry_msgs::msg::Twist;
 
 /* 
  * This node publishes Twist messages based on keyboard control messages
@@ -21,8 +19,8 @@ using Twist = geometry_msgs::msg::Twist;
 */
 class KeyMovementNode : public Node {
 	// ROS tools
-    Subscription<KeyMsg>::SharedPtr key_subscriber;
-    Publisher<Twist>::SharedPtr movement_publisher;
+    Subscription<!!!>::SharedPtr key_subscriber;
+    Publisher<!!!>::SharedPtr movement_publisher;
     TimerBase::SharedPtr timer;
     
     // Parameters
@@ -56,5 +54,6 @@ class KeyMovementNode : public Node {
 		
 };
 
+// Allowing defines for constants like pi from cmath.h
 #define _USE_MATH_DEFINES
 #endif
