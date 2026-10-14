@@ -6,6 +6,9 @@
 #include "teleop_control/msg/key_input_msg.hpp"
 #include <cmath>
 
+using KeyMsg = teleop_control::msg::KeyInputMsg;
+using Twist = geometry_msgs::msg::Twist;
+
 using namespace rclcpp;
 
 /* 
@@ -19,8 +22,8 @@ using namespace rclcpp;
 */
 class KeyMovementNode : public Node {
 	// ROS tools
-    Subscription<!!!>::SharedPtr key_subscriber;
-    Publisher<!!!>::SharedPtr movement_publisher;
+    Subscription<teleop_control::msg::KeyInputMsg>::SharedPtr key_subscriber;
+    Publisher<geometry_msgs::msg::Twist>::SharedPtr movement_publisher;
     TimerBase::SharedPtr timer;
     
     // Parameters
