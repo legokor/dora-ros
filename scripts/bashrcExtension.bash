@@ -22,7 +22,7 @@ NC='\[\e[0m\]' # No Color
 PS1="${GREEN}\t ${CYAN}\u${NC}@${YELLOW}\h${NC} ${BLUE}\w${NC} ${GREEN}\$${NC} "
 
 # Workspace setup
-source /opt/ros/kilted/setup.bash
+source /opt/ros/${ROS_DISTRO}/setup.bash
 
 # Setting themes
 export GTK_THEME="Adwaita-dark"
