@@ -23,4 +23,4 @@ fi
 
 # Docker compose up builds and starts the container
 echo "Attaching to container"
-docker compose -f docker/docker-compose.yml exec dora bash
+docker-compose -f docker/docker-compose.yml exec dora bash

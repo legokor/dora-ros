@@ -21,7 +21,7 @@ done
 
 if rm_volumes; then
 	echo "Removing container: (Takes a bit of time to gracefully remove)"
-	docker compose -f docker/docker-compose.yml down dora
+	docker-compose -f docker/docker-compose.yml down dora
 fi
 
 if rm_container; then
