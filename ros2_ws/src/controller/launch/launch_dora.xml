@@ -23,7 +23,6 @@
 
     <param name="output" value="screen" />
     <param name="robot_description" value="$(var urdf)" />
-    <param name="frame_prefix" value="dora/" />
   </node>
 
 </launch>
