@@ -22,8 +22,8 @@ using namespace rclcpp;
 */
 class KeyMovementNode : public Node {
 	// ROS tools
-    Subscription<teleop_control::msg::KeyInputMsg>::SharedPtr key_subscriber;
-    Publisher<geometry_msgs::msg::Twist>::SharedPtr movement_publisher;
+    Subscription<KeyMsg>::SharedPtr key_subscriber;
+    Publisher<Twist>::SharedPtr movement_publisher;
     TimerBase::SharedPtr timer;
     
     // Parameters

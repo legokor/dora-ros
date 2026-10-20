@@ -18,6 +18,7 @@ basePackages=(
 
 packages=(
 	python3-rosdep  # automatic ROS dependency installer
+	python3-pygame # for a prototype-teleop interface
     ros-dev-tools   # Dev tools
     ros-${ROS_DISTRO}-desktop   # Ros2 for developtment
     ros-${ROS_DISTRO}-xacro   # XML macro runner for URDF files.

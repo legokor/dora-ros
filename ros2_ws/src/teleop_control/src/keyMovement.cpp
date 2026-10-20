@@ -3,18 +3,17 @@
 #include "rclcpp/utilities.hpp"
 #include <chrono>
 
+using Twist = geometry_msgs::msg::Twist;
+using KeyMsg = teleop_control::msg::KeyInputMsg;
 using namespace rclcpp;
 using namespace std::chrono_literals;
 
-using KeyMsg = teleop_control::msg::KeyInputMsg;
-using Twist = geometry_msgs::msg::Twist;
-
 // Constructor
 KeyMovementNode::KeyMovementNode() : Node("key_movement_node") {
-    key_subscriber = create_subscription<teleop_control::msg::KeyInputMsg>("/key_teleop_control", 10,
+    key_subscriber = create_subscription<KeyMsg>("key_teleop_control", 10,
 			[this](KeyMsg::SharedPtr msg) {ChangeSpeed(msg);});
-    movement_publisher = create_publisher<Twist>("/cmd_vel", 10);
-	timer = create_wall_timer(50ms, [this](){PublishSpeed();});
+    movement_publisher = create_publisher<Twist>("cmd_vel", 10);
+	timer = create_wall_timer(50ms, [this]() {PublishSpeed();});
 }
 
 // Reacts to key input and changes the robot's speed accordingly
@@ -23,7 +22,11 @@ void KeyMovementNode::ChangeSpeed(const KeyMsg::SharedPtr& msg) {
 	for (auto key_code : msg->keys) {
 		switch(key_code) {
 			case 'w': linSpeed += linAccel; break;
+			case 'a': strafeSpeed -= linAccel; break;
 			case 's': linSpeed -= linAccel; break;
+			case 'd': strafeSpeed += linAccel; break;
+			case 'q': angSpeed -= angAccel; break;
+			case 'e': angSpeed += angAccel; break;
 		}
 	}
 	
@@ -52,9 +55,9 @@ void KeyMovementNode::PublishSpeed() {
     
     // Generating message
 	auto new_msg = Twist();
-	new_msg.linear.x = linSpeed;
-	new_msg.linear.y = strafeSpeed;
-	new_msg.angular.z = angSpeed;
+    new_msg.linear.x = linSpeed;
+    new_msg.linear.y = strafeSpeed;
+    new_msg.angular.z = angSpeed;
     
     // Publishing
     movement_publisher->publish(new_msg);
