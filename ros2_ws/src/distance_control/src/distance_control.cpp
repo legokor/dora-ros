@@ -28,7 +28,7 @@ void Distance_Control_Node::ProcessLaserScan(LaserScan::SharedPtr& msg) {
 }
 
 float Distance_Control_Node::CalcSpeed(float distance) {
-    return std::clamp(distance/(maxDistance-minDistance), 0.0f, 1.0f);
+    return 1.0f-std::clamp((distance-minDistance)/(maxDistance-minDistance), 0.0f, 1.0f);
 }
 
 void Distance_Control_Node::SendTwist(float degree, float magnitude) {
