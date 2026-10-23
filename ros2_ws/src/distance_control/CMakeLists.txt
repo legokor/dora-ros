@@ -13,6 +13,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 
 include_directories(include/distance_control)
 include_directories(launch)
@@ -25,6 +26,7 @@ target_link_libraries(${PROJECT_NAME}
   rclcpp::rclcpp
   geometry_msgs::geometry_msgs
   sensor_msgs::sensor_msgs
+  std_srvs::std_srvs
 )
 
 # Install files

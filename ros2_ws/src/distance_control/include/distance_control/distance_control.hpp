@@ -2,13 +2,15 @@
 #define DIS_CON
 
 #include "rclcpp/node.hpp"
-#include "rclcpp/executors.hpp"
+#include "rclcpp/executors/single_threaded_executor.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
+#include "std_srvs/srv/set_bool.hpp"
 #include <math.h>
 
 using Twist = geometry_msgs::msg::Twist;
 using LaserScan = sensor_msgs::msg::LaserScan;
+using SetBool = std_srvs::srv::SetBool;
 
 using namespace rclcpp;
 
@@ -17,6 +19,7 @@ class Distance_Control_Node : public Node {
     // Ros2 communication
     Subscription<LaserScan>::SharedPtr scan_subscriber;
     Publisher<Twist>::SharedPtr twist_publisher;
+    Service<SetBool>::SharedPtr toggle_service;
     
     /* Parameters.
     * For me it makes more sense the mininum distance is actually lower,
@@ -25,6 +28,9 @@ class Distance_Control_Node : public Node {
     float minDistance = declare_parameter<float>("minimum_distance", 0.5f);
     float maxDistance = declare_parameter<float>("maximum_distance", 1.0f);
     float clearLimit = declare_parameter<float>("clear_Limit", 0.1f);
+    
+    // Values:
+    bool isOn = true;
     
     public:
     
@@ -45,6 +51,9 @@ class Distance_Control_Node : public Node {
 	
 	/* Doesn't publish the message */
 	void SendTwist(float degree, float magnitude);
+	
+	/* Service callback */
+	inline void SwitchToggle(bool state);
 };
 
 #endif
