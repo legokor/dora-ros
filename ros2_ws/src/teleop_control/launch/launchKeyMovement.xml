@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
     <node pkg="teleop_control" exec="teleopKey" name="teleopKey" output="screen">
+        <param name="publishRate"/>
     </node>
 
     <node pkg="teleop_control" exec="keyControl" name="keyControl" output="screen">

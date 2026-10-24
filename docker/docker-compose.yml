@@ -26,6 +26,7 @@ services:
       - dev-tools-vol:/usr
       - dev-settings-vol:/root
       - dev-var-vol:/var
+      - dev-etc-vol:/etc
     
     # Environment variables for GUI app use and saving app data.
     environment:
@@ -82,4 +83,6 @@ volumes:
   dev-settings-vol: # /root
   # For saving app data
   dev-var-vol: # /var
+  # To store system group files (dpks bugs a lot otherwise between rebuilds)
+  dev-etc-vol: # /etc
 

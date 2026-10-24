@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <node pkg="distance_control" exec="distance_control" name="distance_control">
+	<param name="minimum_distance" value="0.6"/>
+	<param name="maximum_distance" value="0.8"/>
+	<param name="clear_limit" value="0.25"/>
+    </node>
+</launch>

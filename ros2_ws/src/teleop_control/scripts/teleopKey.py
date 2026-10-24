@@ -5,14 +5,10 @@ import rclpy
 import os
 import time
 from rclpy.node import Node
-from rclpy.exceptions import ParameterNotDeclaredException
-from rcl_interfaces.msg import ParameterDescriptor
-from rcl_interfaces.msg import ParameterType
 from ament_index_python.packages import get_package_share_directory
 
 # Msg import
-from teleop_control.msg import KeyInputMsg
-from teleop_control.msg import MouseInputMsg
+from teleop_control.msg import KeyInputMsg, MouseInputMsg
 
 
 # Responsible for transforming keyboard and mouse input
@@ -26,8 +22,10 @@ class TeleopKeyPublisher(Node):
                             KeyInputMsg, "key_teleop_control", 10)
         self.mousePublisher = self.create_publisher(
                             MouseInputMsg, "mouse_teleop_control", 10)
-        self.publishRate = 1/10    # 1/Hz = sec
-        # Due to the program's logic, the actual publish rate is a bit slower
+        self.publishRate = self.decleare_parameter("publishrate", 1/10)
+        # 1/Hz = sec
+        # Due to the program's logic, the actual publish rate is
+        # a bit slower and has a minimum
 
         # Msg variables (Generating only once is enough)
         self.Mouse_msg = MouseInputMsg()
@@ -138,6 +136,8 @@ def main(args=None):
     # Main event loop
     while rclpy.ok():
 
+        start = time.time()
+
         # Events
         for event in pygame.event.get():
             match event.type:
@@ -160,7 +160,8 @@ def main(args=None):
         screen.blit(bg, (0, 0))
 
         # Process sleep in seconds
-        time.sleep(teleop_node.publishRate)
+        processTime = teleop_node.publishRate - (time.time()-start)
+        time.sleep(processTime) if processTime > 0 else 0
 
     pygame.quit()
     teleop_node.destroy_node()

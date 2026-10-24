@@ -49,8 +49,8 @@ install(DIRECTORY launch images DESTINATION share/${PROJECT_NAME}/)
 
 install(PROGRAMS
   scripts/teleopKey.py
+  scripts/nav2Teleop.py
   DESTINATION lib/${PROJECT_NAME}
-  RENAME ${script_name}
 )
 
 # Ament package

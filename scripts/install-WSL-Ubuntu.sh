@@ -1,10 +1,11 @@
 #!/bin/bash
 
 ## Helper script to install ros2 on native ubuntu and wsl
+# Run from project root dir.
 # Don't call with sudo because the ROS_DISTRO env-var will be set to root instead of the user
 
 # Ros version:
-export ROS_DISTRO=kilted
+export ROS_DISTRO=jazzy
 
 # Adding Personal Package Archives due to Ubuntu's repos lacking behind
 sudo add-apt-repository -y ppa:zhangsongcui3371/fastfetch  # Can't live without fastfetch.
@@ -17,6 +18,7 @@ basePackages=(
 
 packages=(
 	python3-rosdep  # automatic ROS dependency installer
+	python3-pygame # for a prototype-teleop interface
     ros-dev-tools   # Dev tools
     ros-${ROS_DISTRO}-desktop   # Ros2 for developtment
     ros-${ROS_DISTRO}-xacro   # XML macro runner for URDF files.
@@ -30,6 +32,7 @@ packages=(
     ros-${ROS_DISTRO}-rqt   # Analytics panel for ROS data
     ros-${ROS_DISTRO}-rqt-common-plugins  # Better logging, settings etc...
     ros-${ROS_DISTRO}-joint-state-publisher-gui   # Allows manual joint configuration
+    ros-${ROS_DISTRO}-turtlesim
     # rplidar package is not maintained :/ 
     # ros-${ROS_DISTRO}-rplidar-ros
     
@@ -63,7 +66,7 @@ sudo apt update
 sudo apt install ros-dev-tools "${packages[@]}"
 
 # Sourcing bash to apply downloaded theme to QT via environment vars
-source $HOME/dora-ros/scripts/bashrcExtension.bash
+source ./dora-ros/scripts/bashrcExtension.bash
 
 # Gsettings to apply gtk theme and icon
 gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"

@@ -43,7 +43,7 @@ void ControllerNode::publishMeasure(const SpeedData& msg) {
     newmsg.twist.linear.y = y;
     newmsg.twist.angular.z = th;
     
-    newmsg.header.stamp = this->get_clock()->now();;
+    newmsg.header.stamp = this->get_clock()->now();
 
     twist_publisher->publish(newmsg);
 }

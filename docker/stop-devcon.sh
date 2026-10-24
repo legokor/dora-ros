@@ -6,6 +6,7 @@ echo "Stopping container:"
 docker container stop dev
 echo "Saving progress:"
 docker container cp dev:/root/dora-ros/ros2_ws .
+sudo chown -R $USER:$USER .
 # Git operations. Plan is to add the commit message and branch as arguments to the script
 # git commit -m "$1"
 # git push origin HEAD:$2

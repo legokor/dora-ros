@@ -5,7 +5,7 @@
 
 # ROS packages and dev tools
 packages=(
-	nano curl btop tree unzip neovim \
+	software-properties-common nano curl btop tree unzip neovim \
     python3 python3-pip
     python3-rosdep \  # automatic ROS dependency installer
     ros-dev-tools \  # Dev tools

@@ -6,9 +6,10 @@
 #include "teleop_control/msg/key_input_msg.hpp"
 #include <cmath>
 
-using namespace rclcpp;
 using KeyMsg = teleop_control::msg::KeyInputMsg;
 using Twist = geometry_msgs::msg::Twist;
+
+using namespace rclcpp;
 
 /* 
  * This node publishes Twist messages based on keyboard control messages
@@ -56,5 +57,6 @@ class KeyMovementNode : public Node {
 		
 };
 
+// Allowing defines for constants like pi from cmath.h
 #define _USE_MATH_DEFINES
 #endif

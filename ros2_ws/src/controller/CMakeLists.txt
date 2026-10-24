@@ -22,14 +22,15 @@ add_executable(${CMAKE_PROJECT_NAME} src/controller_node.cpp src/main.cpp
                                      src/uart_handler.cpp src/odometry_node.cpp)
 
 # Link against necessary libraries
-ament_target_dependencies(${CMAKE_PROJECT_NAME}
-  rclcpp
-  geometry_msgs
-  nav_msgs
-  tf2
-  tf2_ros
-  tf2_geometry_msgs
-)
+target_link_libraries(controller PUBLIC
+      geometry_msgs::geometry_msgs
+      nav_msgs::nav_msgs
+      rclcpp::rclcpp
+      tf2::tf2
+      tf2_geometry_msgs::tf2_geometry_msgs
+      tf2_ros::static_transform_broadcaster_node
+      tf2_ros::tf2_ros
+    )
 
 # Install
 install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION lib/${CMAKE_PROJECT_NAME})

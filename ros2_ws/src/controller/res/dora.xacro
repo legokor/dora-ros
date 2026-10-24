@@ -178,11 +178,11 @@
     </joint>
 
     <!-- Laser frame for SLAM -->
-    <link name="laser_frame"></link>
+    <link name="laser"></link>
 
     <joint name="laser_joint" type="fixed">
         <parent link="lidar_head"/>
-        <child link="laser_frame"/>
+        <child link="laser"/>
     </joint>
 
     <!-- Wheels -->
