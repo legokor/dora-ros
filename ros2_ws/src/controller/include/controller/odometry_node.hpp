@@ -34,6 +34,8 @@ namespace dora {
         float y_total = 0;
         float th_total = 0;
         rclcpp::Time last_time;
+	
+	double encoder_scale = declare_parameter<double>("encoder_scale", 0.05782);
 
         // Ros communication:
         rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr speed_subscriber;

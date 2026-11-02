@@ -104,9 +104,9 @@ void OdometryNode::odomUpdate(const TwistStamped::SharedPtr& speedData) {
     double delta_y = (vx * sin(mid_th) + vy * cos(mid_th)) * delta_time;
 
 	// Summing deltas:
-    x_total += delta_x;
-    y_total += delta_y;
-    th_total += delta_th;
+    x_total += delta_x * encoder_scale;
+    y_total += delta_y * encoder_scale;
+    th_total += delta_th * encoder_scale;
 
     // Sending data:
     sendTransform(current_time);

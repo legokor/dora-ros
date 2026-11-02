@@ -1,9 +1,6 @@
 #!/bin/bash
 
-# Run from root directory with "docker/launch-devcon.sh" !
-
-# Enabling X11 forwarding support. 
-xhost +local:docker
+# Run from root directory with "./docker/launch-devcon.sh" !
 
 ## Flags
 # -f : force rebuild container

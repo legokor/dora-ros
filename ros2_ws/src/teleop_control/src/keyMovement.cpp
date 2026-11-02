@@ -27,6 +27,7 @@ void KeyMovementNode::ChangeSpeed(const KeyMsg::SharedPtr& msg) {
 			case 'd': strafeSpeed += linAccel; break;
 			case 'q': angSpeed -= angAccel; break;
 			case 'e': angSpeed += angAccel; break;
+			case 'r': break;
 		}
 	}
 	

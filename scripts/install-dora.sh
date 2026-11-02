@@ -3,9 +3,12 @@
 ## This script installs runtime packages outside container building
 # Volumes keep downloaded packages, so this script should be ran once when creating new volumes 
 
+apt-get update
+apt-get install software-properties-common
+
 # ROS packages and dev tools
 packages=(
-	software-properties-common nano curl btop tree unzip neovim \
+	nano curl btop tree unzip neovim \
     python3 python3-pip
     python3-rosdep \  # automatic ROS dependency installer
     ros-dev-tools \  # Dev tools

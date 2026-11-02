@@ -22,7 +22,7 @@ class TeleopKeyPublisher(Node):
                             KeyInputMsg, "key_teleop_control", 10)
         self.mousePublisher = self.create_publisher(
                             MouseInputMsg, "mouse_teleop_control", 10)
-        self.publishRate = self.decleare_parameter("publishrate", 1/10)
+        self.publishRate = self.declare_parameter("publishrate", 1/10)
         # 1/Hz = sec
         # Due to the program's logic, the actual publish rate is
         # a bit slower and has a minimum
@@ -160,7 +160,7 @@ def main(args=None):
         screen.blit(bg, (0, 0))
 
         # Process sleep in seconds
-        processTime = teleop_node.publishRate - (time.time()-start)
+        processTime = teleop_node.get_parameter('publishrate').value - (time.time()-start)
         time.sleep(processTime) if processTime > 0 else 0
 
     pygame.quit()

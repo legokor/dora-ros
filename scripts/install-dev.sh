@@ -4,15 +4,20 @@
 # Volumes keep downloaded packages, so this script should be ran once when creating new volumes
 # It should take about 10 mins to finish over wifi.
 
+# Installing packages
+apt-get update
+apt-get upgrade -y
+apt-get install software-properties-common
+
 # Adding Personal Package Archives due to Ubuntu's repos lacking behind
 add-apt-repository -y ppa:ubuntuhandbook1/geany  # For built in color themes
 add-apt-repository -y ppa:zhangsongcui3371/fastfetch  # Can't live without fastfetch.
 
 packages=(
-	# ROS packages and dev tools	
-	software-properties-common nano curl btop tree unzip neovim
+    # ROS packages and dev tools	
+    nano curl btop tree unzip neovim
     python3 python3-pip
-	python3-rosdep  # automatic ROS dependency installer
+    python3-rosdep  # automatic ROS dependency installer
     ros-dev-tools   # Dev tools
     ros-${ROS_DISTRO}-desktop   # Ros2 for developtment
     ros-${ROS_DISTRO}-xacro   # XML macro runner for URDF files.
@@ -28,36 +33,34 @@ packages=(
     ros-${ROS_DISTRO}-joint-state-publisher-gui   # Allows manual joint configuration
     # rplidar package is not maintained :/ 
     # ros-${ROS_DISTRO}-rplidar-ros
-    
+
     # Development tools
     geany   # Lightweight GUI code editor
-	geany-plugins   # Plugins like LSP client
-	thunar   # File explorer
-	alacritty   # Terminal emulator
-	fastfetch  # EXTREMELY IMPORTANT
+    geany-plugins   # Plugins like LSP client
+    thunar   # File explorer
+    alacritty   # Terminal emulator
+
+    # GUI tools and themes for setting Rviz outlook you have to manually set the theme in qt5ct/qt6ct
+    fuzzel  # Application launcher for files with .desktop entries
+    apwal   # Application launcher which allows you to wire commands to launch icons easily 
+    qt5ct   # Qt5 Control panel
+    qt6ct   # Qt6 Control panel
+    gnome-themes-extra-data   # Adwaita-dark theme
+    adwaita-qt   # Matching qt5 theme for Adwaita-dark
+    adwaita-qt6  # Matching qt6 theme for Adwaita-dark
+    papirus-icon-theme  # Nice looking icon theme
+    dbus dbus-x11 dconf-service dconf-cli at-spi2-core x11-utils # Various GUI dependencies
+
+    # Language servers for code editing
+    python3-pylsp
+    clangd-20
+    bear
 	
-	# GUI tools and themes for setting Rviz outlook you have to manually set the theme in qt5ct/qt6ct
-	fuzzel  # Application launcher for files with .desktop entries
-	apwal   # Application launcher which allows you to wire commands to launch icons easily 
-	qt5ct   # Qt5 Control panel
-	qt6ct   # Qt6 Control panel
-	gnome-themes-extra-data   # Adwaita-dark theme
-	adwaita-qt   # Matching qt5 theme for Adwaita-dark
-	adwaita-qt6  # Matching qt6 theme for Adwaita-dark
-	papirus-icon-theme  # Nice looking icon theme
-	dbus dbus-x11 dconf-service dconf-cli at-spi2-core x11-utils # Various GUI dependencies
-	
-	# Language servers for code editing
-	python3-pylsp
-	clangd-20
-	
-	# Sound dependencies
-	pipewire-alsa pipewire libasound2-dev alsa-utils
+    # Sound dependencies
+    pipewire-alsa pipewire libasound2-dev alsa-utils
 )
 
-# Installing packages
-apt-get update
-apt-get upgrade -y
+
 apt-get install -y "${packages[@]}"
 
 # Sourcing bash to apply downloaded theme to QT via environment vars

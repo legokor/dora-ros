@@ -137,7 +137,7 @@
     <!-- Lidar head -->
     <link name="lidar_head">
         <visual>
-            <origin xyz="0 0 ${lidar_height / 2}"/>
+            <origin xyz="0 0 ${lidar_height / 2}" rpy="0 0 ${-pi / 2}"/>
 
             <geometry>
                 <cylinder length="${lidar_height}" radius="${lidar_width/2}" />
