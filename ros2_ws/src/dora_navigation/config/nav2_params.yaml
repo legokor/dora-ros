@@ -1,0 +1,326 @@
+
+# Navigation2 configuration file for Dora
+
+# Provides high level control through a behavioural tree, which is basically a tree graph
+# where each node is a condition or an action (or both).
+bt_navigator:
+  ros__parameters:
+    use_sim_time: False
+    global_frame: map
+    robot_base_frame: base_link
+    odom_topic: /odom
+    bt_loop_duration: 10
+    default_server_timeout: 20
+    enable_groot_monitoring: True
+    groot_zmq_publisher_port: 1666
+    groot_zmq_server_port: 1667
+
+# Rclcpp node of BT nav.
+bt_navigator_rclcpp_node:
+  ros__parameters:
+    use_sim_time: False
+
+
+# Controls the stack's Twist msg output. Can be fine tuned for different scenarios 
+controller_server:
+  ros__parameters:
+    odom_topic: "/odom"
+    use_sim_time: False
+    controller_frequency: 20.0
+    min_x_velocity_threshold: 0.01
+    min_y_velocity_threshold: 0.01
+    min_theta_velocity_threshold: 0.01
+    failure_tolerance: 5.0
+    progress_checker_plugin: "progress_checker"
+    goal_checker_plugins: ["general_goal_checker"]
+    controller_plugins: ["FollowPath"]
+
+    progress_checker:
+      plugin: "nav2_controller::SimpleProgressChecker"
+      required_movement_radius: 0.25
+      movement_time_allowance: 10.0
+
+    general_goal_checker:
+      stateful: True
+      plugin: "nav2_controller::SimpleGoalChecker"
+      xy_goal_tolerance: 0.1
+      yaw_goal_tolerance: 0.1
+
+    FollowPath:
+      plugin: "dwb_core::DWBLocalPlanner"
+      debug_trajectory_details: True
+      min_vel_x: -1.0
+      min_vel_y: -1.0
+      max_vel_x: 1.0
+      max_vel_y: 1.0
+      max_vel_theta: 1.0
+      min_speed_xy: 0.0
+      max_speed_xy: 1.4142
+      min_speed_theta: 0.0
+      acc_lim_x: 2.5
+      acc_lim_y: 2.5
+      acc_lim_theta: 3.2
+      decel_lim_x: -2.5
+      decel_lim_y: -2.5
+      decel_lim_theta: -3.2
+      vx_samples: 20
+      vy_samples: 20
+      vtheta_samples: 20
+      sim_time: 1.5
+      linear_granularity: 0.05
+      angular_granularity: 0.025
+      transform_tolerance: 0.5
+      trans_stopped_velocity: 0.25
+      short_circuit_trajectory_evaluation: True
+      stateful: True
+      critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
+      BaseObstacle:
+        scale: 0.02
+      PathAlign:
+        scale: 32.0
+        forward_point_distance: 0.1
+      GoalAlign:
+        scale: 24.0
+        forward_point_distance: 0.1
+      PathDist:
+        scale: 32.0
+      GoalDist:
+        scale: 24.0
+      RotateToGoal:
+        scale: 32.0
+        slowing_factor: 5.0
+        lookahead_time: -1.0
+
+# Rclcpp node of coltrol server.
+controller_server_rclcpp_node:
+  ros__parameters:
+    use_sim_time: False
+
+# SLAM parameter. Configures the detailed costmap containing
+# a lot of information about objects in close proximity
+local_costmap:
+  ros__parameters:
+    update_frequency: 2.0
+    publish_frequency: 2.0
+    global_frame: odom
+    robot_base_frame: base_link
+    use_sim_time: False
+    rolling_window: true
+    width: 1
+    height: 1
+    resolution: 0.05
+    robot_radius: 0.22
+    plugins: ["voxel_layer", "inflation_layer"]
+    inflation_layer:
+      plugin: "nav2_costmap_2d::InflationLayer"
+      cost_scaling_factor: 3.0
+      inflation_radius: 0.1
+    voxel_layer:
+      plugin: "nav2_costmap_2d::VoxelLayer"
+      enabled: True
+      publish_voxel_map: True
+      origin_z: 0.0
+      z_resolution: 0.05
+      z_voxels: 16
+      max_obstacle_height: 2.0
+      mark_threshold: 0
+      observation_sources: scan
+      scan:
+        topic: /scan
+        max_obstacle_height: 2.0
+        clearing: True
+        marking: True
+        data_type: "LaserScan"
+        raytrace_max_range: 3.0
+        raytrace_min_range: 0.0
+        obstacle_max_range: 2.5
+        obstacle_min_range: 0.0
+    static_layer:
+      map_subscribe_transient_local: True
+    always_send_full_costmap: True
+
+local_costmap_client:
+  ros__parameters:
+    use_sim_time: False
+
+local_costmap_rclcpp_node:
+  ros__parameters:
+    use_sim_time: False
+
+# SLAM parameter. Configures the less detailed costmap which contains
+# less information than the local costmap, but over a wider range (Has to be configure for that though)
+global_costmap:
+  ros__parameters:
+    update_frequency: 1.0
+    publish_frequency: 1.0
+    global_frame: map
+    robot_base_frame: base_link
+    use_sim_time: False
+    robot_radius: 0.22
+    resolution: 0.05
+    track_unknown_space: true
+    plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+    obstacle_layer:
+      plugin: "nav2_costmap_2d::ObstacleLayer"
+      enabled: True
+      observation_sources: scan
+      scan:
+        topic: /scan
+        max_obstacle_height: 2.0
+        clearing: True
+        marking: True
+        data_type: "LaserScan"
+        raytrace_max_range: 3.0
+        raytrace_min_range: 0.0
+        obstacle_max_range: 2.5
+        obstacle_min_range: 0.0
+    static_layer:
+      plugin: "nav2_costmap_2d::StaticLayer"
+      map_subscribe_transient_local: True
+    inflation_layer:
+      plugin: "nav2_costmap_2d::InflationLayer"
+      cost_scaling_factor: 3.0
+      inflation_radius: 0.55
+    always_send_full_costmap: True
+
+global_costmap_client:
+  ros__parameters:
+    use_sim_time: False
+
+global_costmap_rclcpp_node:
+  ros__parameters:
+    use_sim_time: False
+
+# Publishes the map created by SLAM
+map_server:
+  ros__parameters:
+    use_sim_time: False
+    yaml_filename: "map.yaml"
+
+# Saves the map created by SLAM
+map_saver:
+  ros__parameters:
+    use_sim_time: False
+    save_map_timeout: 5.0
+    free_thresh_default: 0.25
+    occupied_thresh_default: 0.65
+    map_subscribe_transient_local: True
+
+# Route planner. Makes a path in regard to known obstacles
+planner_server:
+  ros__parameters:
+    expected_planner_frequency: 20.0
+    use_sim_time: False
+    planner_plugins: ["GridBased"]
+    GridBased:
+      plugin: "nav2_navfn_planner::NavfnPlanner"
+      tolerance: 0.5
+      use_astar: false
+      allow_unknown: true
+
+planner_server_rclcpp_node:
+  ros__parameters:
+    use_sim_time: False
+
+# Standard behaviour server. Controls what to do when new information presents
+# along the planned route
+behavior_server:
+  ros__parameters:
+    local_costmap_topic: local_costmap/costmap_raw
+    global_costmap_topic: global_costmap/costmap_raw
+    local_footprint_topic: local_costmap/published_footprint
+    global_footprint_topic: global_costmap/published_footprint
+    cycle_frequency: 10.0
+    behavior_plugins: ["spin", "backup", "wait"]
+    spin:
+      plugin: "nav2_behaviors::Spin"
+    backup:
+      plugin: "nav2_behaviors::BackUp"
+    wait:
+      plugin: "nav2_behaviors::Wait"
+    local_frame: odom
+    global_frame: map
+    robot_base_frame: base_link
+    transform_timeout: 0.1
+    use_sim_time: False
+    simulate_ahead_time: 2.0
+    max_rotational_vel: 1.0
+    min_rotational_vel: -1.0
+    rotational_acc_lim: 3.2
+
+robot_state_publisher:
+  ros__parameters:
+    use_sim_time: False
+
+waypoint_follower:
+  ros__parameters:
+    loop_rate: 20
+    use_sim_time: False
+
+# More advanced collision monitor (Stops the robot when an object is within radius
+collision_monitor:
+  ros__parameters:
+    use_sim_time: False
+    base_frame_id: "base_link"
+    odom_frame_id: "odom"
+    cmd_vel_in_topic: "cmd_vel_smoothed"
+    cmd_vel_out_topic: "cmd_vel"
+    state_topic: "collision_monitor_state"
+    transform_tolerance: 0.5
+    source_timeout: 1.0
+    base_shift_correction: True
+    stop_pub_timeout: 2.0
+    
+    observation_sources: ["scan"]
+    scan:
+      type: "scan"
+      topic: "/scan"
+    
+    polygons: ["circle_stop", "circle_slowdown"]
+    
+    circle_stop:
+      type: "circle"          
+      action_type: "stop"     
+      radius: 0.25           
+      prediction_distance: 0.0
+      visualize: True
+
+    circle_slowdown:
+      type: "circle"          
+      action_type: "slowdown" 
+      radius: 0.4
+      slowdown_ratio: 0.5
+      prediction_distance: 0.0
+      visualize: True
+
+# For docking the robot to a charger
+docking_server:
+  ros__parameters:
+    use_sim_time: False
+    controller_plugin: "opennav_docking::SimpleChargingDockController"
+    
+    odom_frame: "odom"
+    robot_base_frame: "base_link"
+    fixed_frame: "map"
+    
+    docking_test_facility: False
+    transform_timeout: 0.1
+    dock_plugins: ["charging_dock"] # List of registered docks
+
+    charging_dock:
+      plugin: "opennav_docking::SimpleChargingDock"
+      dock_type: "charging_dock"
+      dock_frame: "charging_station_frame"
+      staging_x_offset: -0.8
+      staging_yaw_offset: 0.0 
+      charging_timeout: 10.0
+      charging_threshold: 0.5
+
+slam_toolbox:
+  ros__parameters:
+    use_sim_time: False
+    map_update_interval: 0.5
+    minimum_travel_distance: 0.1
+    minimum_travel_heading: 0.1
+    
+    

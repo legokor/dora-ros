@@ -8,21 +8,39 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 include_directories(include)
+include_directories(launch)
+include_directories(res)
 
 # Create the executable
 add_executable(${CMAKE_PROJECT_NAME} src/controller_node.cpp src/main.cpp
-                                     src/uart_handler.cpp)
+                                     src/uart_handler.cpp src/odometry_node.cpp)
 
 # Link against necessary libraries
-target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC rclcpp::rclcpp
-                                                   ${geometry_msgs_TARGETS})
+target_link_libraries(controller PUBLIC
+      geometry_msgs::geometry_msgs
+      nav_msgs::nav_msgs
+      rclcpp::rclcpp
+      tf2::tf2
+      tf2_geometry_msgs::tf2_geometry_msgs
+      tf2_ros::static_transform_broadcaster_node
+      tf2_ros::tf2_ros
+    )
 
 # Install
 install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION lib/${CMAKE_PROJECT_NAME})
 
 install(DIRECTORY launch res DESTINATION share/${CMAKE_PROJECT_NAME}/)
+
+ament_export_dependencies(rosidl_default_runtime)
+
+# Exporting configuration for clang
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Ament package
 ament_package()

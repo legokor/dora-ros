@@ -9,19 +9,22 @@
 #include <variant>
 
 using Twist = geometry_msgs::msg::Twist;
+using TwistStamped = geometry_msgs::msg::TwistStamped;
 
 using namespace dora;
 
 ControllerNode::ControllerNode() : Node("uart_handler_node"), uart("/dev/ttyUSB1", B115200) {
-    velocity_subscriber = create_subscription<Twist>("cmd_vel", 10, [this](Twist::SharedPtr t) { sendTwist(t); });
-    imu_publisher = create_publisher<Twist>("odom", 10);
 
-    io_thread_running = true;
+    // Initialising publishers and subscribers
+    velocity_subscriber = create_subscription<Twist>("cmd_vel", 10, [this](Twist::SharedPtr t) { sendTwist(t); });
+    twist_publisher = create_publisher<TwistStamped>("encoder_speed", 10);
+    
+    // Starting IO thread
     io_thread = std::thread([this]() {
+        io_thread_running = true;
         while (io_thread_running) {
             std::expected<ReceivedMessage, std::string> msg = uart.receiveMessage();
-
-            if (msg) {
+            if (msg)
                 handleReceivedMessage(*msg);
             } else {
                 // if error message is "no new message from uart", don't stop WHEN DEBUGGING
@@ -43,17 +46,23 @@ void ControllerNode::sendTwist(const Twist::SharedPtr& msg) {
     uart.sendSpeedCommand(msg->linear.x, msg->linear.y, msg->angular.z);
 }
 
+void ControllerNode::publishMeasure(const SpeedData& msg) {
+    auto [x, y, th] = msg;
+
+    auto newmsg = TwistStamped();
+    newmsg.twist.linear.x = x;
+    newmsg.twist.linear.y = y;
+    newmsg.twist.angular.z = th;
+    
+    newmsg.header.stamp = this->get_clock()->now();
+
+    twist_publisher->publish(newmsg);
+}
+
+// Currently only looks for SpeedData and RobotStatus messages
 void ControllerNode::handleReceivedMessage(const ReceivedMessage& msg) {
     if (std::holds_alternative<SpeedData>(msg)) {
-        auto [x, y, w] = std::get<SpeedData>(msg);
-
-        Twist twist;
-        twist.linear.x = x;
-        twist.linear.y = y;
-        twist.angular.z = w;
-        imu_publisher->publish(twist);
-
-        RCLCPP_INFO(get_logger(), "got speed data: x:%f y:%f w:%f", x, y, w);
+        publishMeasure(std::get<SpeedData>(msg));
     } else if (std::holds_alternative<RobotStatus>(msg)) {
         auto [voltage] = std::get<RobotStatus>(msg);
         RCLCPP_INFO(get_logger(), "got robot status: v:%f", voltage);

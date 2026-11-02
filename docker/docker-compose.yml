@@ -1,0 +1,88 @@
+version: "3"
+services:
+  dev:
+    container_name: dev
+    
+    # Build settings
+    build: 
+      context: .. # Project root dir
+      dockerfile: docker/LocalBuild.Dockerfile
+      args:
+        BUILD_TARGET: dev
+
+    tty: true
+    
+    # Network settings
+    network_mode: host
+    ipc: host
+
+    # Mounting X11 socket and sharing host dbus for GUI apps
+    # Also mounting volumes and project
+    volumes:
+      - ..:/root/dora-ros
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/tmp/${WAYLAND_DISPLAY}
+      - dev-vol:/opt/ros/kilted
+      - dev-tools-vol:/usr
+      - dev-settings-vol:/root
+      - dev-var-vol:/var
+      - dev-etc-vol:/etc
+    
+    # Environment variables for GUI app use and saving app data.
+    environment:
+      - DISPLAY=${DISPLAY}
+      - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
+      - HOME=/root
+      - XDG_CONFIG_HOME=/root/.config
+      - XDG_CACHE_HOME=/root/.cache
+      - XDG_DATA_HOME=/root/.local/share
+      - XDG_STATE_HOME=/root/.local/state
+      - XDG_RUNTIME_DIR=/tmp
+      - LIBGL_ALWAYS_SOFTWARE=0
+      - NO_AT_BRIDGE=1
+
+    # Sharing all devices. The most important device is the GPU for rendering GUI
+    devices:
+      - /dev/dri:/dev/dri
+
+  dora:
+    container_name: dora
+    
+    # Build settings
+    build: 
+      context: .. # Project root dir
+      dockerfile: docker/LocalBuild.Dockerfile
+      args:
+        BUILD_TARGET: dev
+
+    tty: true
+
+    # Network settings
+    network_mode: host
+    ipc: host
+
+    # Mounting volumes and project
+    volumes:
+      - dora-vol:/opt/ros/kilted
+      - ..:/root/dora-ros
+
+    # Mounting Lidar and UART adapter 
+    devices:
+      - "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0:/dev/ttyUSB0"
+      - "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A5XK3RJT-if00-port0:/dev/ttyUSB1"
+
+# Storage volumes
+volumes:
+  # For ros packages on the robot (like nav2)
+  dora-vol: # /opt/ros/kilted
+  # For ros packages in the dev container
+  dev-vol: # /opt/ros/kilted
+  # For apps downloaded via apt-get
+  dev-tools-vol: # /usr
+  # For user configurations stored in a home directory (in this case /root)
+  dev-settings-vol: # /root
+  # For saving app data
+  dev-var-vol: # /var
+  # To store system group files (dpks bugs a lot otherwise between rebuilds)
+  dev-etc-vol: # /etc
+

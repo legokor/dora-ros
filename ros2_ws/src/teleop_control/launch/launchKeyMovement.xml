@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <node pkg="teleop_control" exec="teleopKey.py" name="teleopKey" output="screen">
+        <param name="publishRate" value="1/10"/>
+    </node>
+
+    <node pkg="teleop_control" exec="keyControl" name="keyControl" output="screen">
+        <param name="deaccel" value="1.075"/>
+    </node>
+</launch>
