@@ -1,7 +1,6 @@
 build/
 log/
 install/
-
-/ros2_ws/src/rplidar_ros/
-
+.cache/
+ros2_ws/src/rplidar_ros/
 yolov8n.pt
