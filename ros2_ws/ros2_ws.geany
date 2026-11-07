@@ -28,20 +28,18 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=8
-FILE_NAME_0=906;C++;0;EUTF-8;2;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fdistance_control%2Finclude%2Fdistance_control%2Fdistance_control.hpp;0;4
-FILE_NAME_1=2441;C++;0;EUTF-8;0;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fdistance_control%2Fsrc%2Fdistance_control.cpp;0;4
-FILE_NAME_2=172;XML;0;EUTF-8;2;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fdistance_control%2Flaunch%2Flaunch_dis_control.xml;0;4
-FILE_NAME_3=0;Python;0;EUTF-8;0;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fdora_navigation%2Flaunch%2Fnavigation_launch.py;0;4
-FILE_NAME_4=8687;YAML;0;EUTF-8;0;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fdora_navigation%2Fconfig%2Fnav2_params.yaml;0;2
-FILE_NAME_5=5277;Python;0;EUTF-8;0;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fdora_navigation%2Flaunch%2Fslam_launch.py;0;4
-FILE_NAME_6=64;XML;0;EUTF-8;0;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fdora_navigation%2Flaunch%2Flaunch_nav2.xml;0;4
-FILE_NAME_7=259;XML;0;EUTF-8;0;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fdora_navigation%2Flaunch%2Flaunch_nav2_trim.xml;0;4
-FILE_NAME_8=4827;XML;0;EUTF-8;0;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fcontroller%2Fres%2Fdora.xacro;0;4
-FILE_NAME_9=516;C++;0;EUTF-8;0;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fcontroller%2Fsrc%2Fcontroller_node.cpp;0;4
-FILE_NAME_10=20131;Conf;0;EUTF-8;1;1;0;%2Froot%2F.config%2Fgeany%2Fplugins%2Flsp%2Flsp.conf;0;1
-FILE_NAME_11=3974;C++;0;EUTF-8;0;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fcontroller%2Fsrc%2Fodometry_node.cpp;0;4
-FILE_NAME_12=971;C++;0;EUTF-8;2;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fcontroller%2Finclude%2Fcontroller%2Fodometry_node.hpp;0;8
+current_page=10
+FILE_NAME_0=1214;C++;0;EUTF-8;0;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fcontroller%2Fsrc%2Fodometry_node.cpp;0;4
+FILE_NAME_1=1057;C++;0;EUTF-8;0;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fdistance_control%2Fsrc%2Fdistance_control.cpp;0;4
+FILE_NAME_2=1130;C++;0;EUTF-8;2;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fdistance_control%2Finclude%2Fdistance_control%2Fdistance_control.hpp;0;4
+FILE_NAME_3=3008;YAML;0;EUTF-8;0;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fdora_navigation%2Fconfig%2Fnav2_params.yaml;0;2
+FILE_NAME_4=542;C++;0;EUTF-8;2;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fteleop_control%2Fsrc%2FkeyMovement.cpp;0;4
+FILE_NAME_5=285;CMake;0;EUTF-8;0;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fteleop_control%2FCMakeLists.txt;0;2
+FILE_NAME_6=2204;C++;0;EUTF-8;0;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fcontroller%2Fsrc%2Fcontroller_node.cpp;0;4
+FILE_NAME_7=215;CMake;0;EUTF-8;0;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fdora_navigation%2FCMakeLists.txt;0;2
+FILE_NAME_8=155;CMake;0;EUTF-8;0;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fdistance_control%2FCMakeLists.txt;0;2
+FILE_NAME_9=148;CMake;0;EUTF-8;0;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Fcontroller%2FCMakeLists.txt;0;6
+FILE_NAME_10=269;None;0;EUTF-8;1;1;0;%2Froot%2Fdora-ros%2Fros2_ws%2Fsrc%2Ffast_build.mixin;0;1
 
 [VTE]
 last_dir=/root
@@ -52,7 +50,7 @@ settings_type=0
 config_file=
 
 [prjorg]
-expanded_paths=/root/dora-ros/ros2_ws/src/controller/include/controller;/root/dora-ros/ros2_ws/src/controller/res;/root/dora-ros/ros2_ws/src/controller/src;/root/dora-ros/ros2_ws/src/dora_navigation/config;/root/dora-ros/ros2_ws/src/dora_navigation/launch;
+expanded_paths=/root/dora-ros/ros2_ws/src/rplidar_ros;
 source_patterns=*.c;*.C;*.cpp;*.cxx;*.c++;*.cc;*.m;
 header_patterns=*.h;*.H;*.hpp;*.hxx;*.h++;*.hh;
 ignored_dirs_patterns=.*;CVS;

@@ -24,11 +24,9 @@ ControllerNode::ControllerNode() : Node("uart_handler_node"), uart("/dev/ttyUSB1
         io_thread_running = true;
         while (io_thread_running) {
             std::expected<ReceivedMessage, std::string> msg = uart.receiveMessage();
-            if (msg)
+            if (msg) {
                 handleReceivedMessage(*msg);
             } else {
-                // if error message is "no new message from uart", don't stop WHEN DEBUGGING
-                // FIXME: don't strcmp...
                 if (strcmp(msg.error().c_str(), "No new messages on UART") == 0) {
                     RCLCPP_ERROR(get_logger(), "Stopped receiving messages from UART.");
                     break;
@@ -39,7 +37,7 @@ ControllerNode::ControllerNode() : Node("uart_handler_node"), uart("/dev/ttyUSB1
         }
     });
 
-    RCLCPP_INFO(get_logger(), "controller node initialized succesfully");
+    RCLCPP_INFO(get_logger(), "Controller node initialized succesfully");
 }
 
 void ControllerNode::sendTwist(const Twist::SharedPtr& msg) {
@@ -65,7 +63,6 @@ void ControllerNode::handleReceivedMessage(const ReceivedMessage& msg) {
         publishMeasure(std::get<SpeedData>(msg));
     } else if (std::holds_alternative<RobotStatus>(msg)) {
         auto [voltage] = std::get<RobotStatus>(msg);
-        RCLCPP_INFO(get_logger(), "got robot status: v:%f", voltage);
     }
 }
 

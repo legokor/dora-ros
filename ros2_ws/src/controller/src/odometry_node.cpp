@@ -31,12 +31,6 @@ void OdometryNode::sendTransform(const rclcpp::Time& current_time) {
         
         // Publishing message
         tf_broadcaster->sendTransform(msg);
-
-        // Logging
-        std::stringstream ss;
-        ss << "Transformation:\n" <<
-            "- Pose: " << x_total << " ; " << y_total << " ; " << th_total << "\n";
-        RCLCPP_INFO(get_logger(), ss.str().c_str());
 }
 
 void OdometryNode::sendOdometry(const TwistStamped::SharedPtr& speedData) {
@@ -77,13 +71,6 @@ void OdometryNode::sendOdometry(const TwistStamped::SharedPtr& speedData) {
         
         // Publishing message
         odom_publisher->publish(msg);
-
-        // Logging
-        std::stringstream ss;
-        ss << "Odometry:\n" <<
-            "- Pose: " << x_total << " ; " << y_total << " ; " << th_total << "\n" <<
-            "- Velocity: " << speedData->twist.linear.x << ";" << speedData->twist.linear.y << ";" << speedData->twist.linear.z << "\n";
-        RCLCPP_INFO(get_logger(), ss.str().c_str());
 }
 
 void OdometryNode::odomUpdate(const TwistStamped::SharedPtr& speedData) {
@@ -97,7 +84,7 @@ void OdometryNode::odomUpdate(const TwistStamped::SharedPtr& speedData) {
     double vth = speedData->twist.angular.z;
 
     // Coordinate transform
-    // Necessary because the coordinate system of the encoder rotates.
+    // Necessary because the coordinate system of the robot rotates.
     double delta_th = vth * delta_time;
     double mid_th = th_total + delta_th / 2.0; // The average of the time interval
     double delta_x = (vx * cos(mid_th) - vy * sin(mid_th)) * delta_time;
