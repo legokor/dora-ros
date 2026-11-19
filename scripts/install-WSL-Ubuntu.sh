@@ -5,10 +5,7 @@
 # Don't call with sudo because the ROS_DISTRO env-var will be set to root instead of the user
 
 # Ros version:
-export ROS_DISTRO=jazzy
-
-# Adding Personal Package Archives due to Ubuntu's repos lacking behind
-sudo add-apt-repository -y ppa:zhangsongcui3371/fastfetch  # Can't live without fastfetch.
+export ROS_DISTRO=lyrical
 
 # In case they are missing.
 basePackages=(
@@ -35,18 +32,6 @@ packages=(
     ros-${ROS_DISTRO}-turtlesim
     # rplidar package is not maintained :/ 
     # ros-${ROS_DISTRO}-rplidar-ros
-    
-    # Development tools (VsCode should connect automatically to WSL)
-	fastfetch  # EXTREMELY IMPORTANT
-	
-	# GUI tools and themes for setting Rviz outlook you have to manually set the theme in qt5ct/qt6ct
-	fuzzel  # Application launcher for files with .desktop entries
-	apwal   # Application launcher which allows you to wire commands to launch icons easily 
-	qt5ct   # Qt5 Control panel
-	qt6ct   # Qt6 Control panel
-	gnome-themes-extra-data   # Adwaita-dark theme
-	adwaita-qt   # Matching qt5 theme for Adwaita-dark
-	adwaita-qt6  # Matching qt6 theme for Adwaita-dark
 )
 
 # Installing base packages
@@ -68,6 +53,4 @@ sudo apt install ros-dev-tools "${packages[@]}"
 # Sourcing bash to apply downloaded theme to QT via environment vars
 source ./dora-ros/scripts/bashrcExtension.bash
 
-# Gsettings to apply gtk theme and icon
-gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
 

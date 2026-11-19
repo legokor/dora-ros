@@ -60,7 +60,6 @@ packages=(
     pipewire-alsa pipewire libasound2-dev alsa-utils
 )
 
-
 apt-get install -y "${packages[@]}"
 
 # Sourcing bash to apply downloaded theme to QT via environment vars

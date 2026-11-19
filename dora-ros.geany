@@ -28,8 +28,11 @@ long_line_behaviour=1
 long_line_column=100
 
 [files]
-current_page=0
+current_page=3
 FILE_NAME_0=68;None;0;EUTF-8;1;1;0;%2Fhome%2Ftower69%2FProjektek%2Fdora-ros%2F.gitignore;0;4
+FILE_NAME_1=235;Sh;0;EUTF-8;1;1;0;%2Fhome%2Ftower69%2FProjektek%2Fdora-ros%2Fscripts%2Finstall-WSL-Ubuntu.sh;0;4
+FILE_NAME_2=2646;Sh;0;EUTF-8;1;1;0;%2Fhome%2Ftower69%2FProjektek%2Fdora-ros%2Fscripts%2Finstall-dev.sh;0;4
+FILE_NAME_3=0;Sh;0;EUTF-8;1;1;0;%2Fhome%2Ftower69%2FProjektek%2Fdora-ros%2Fscripts%2Finstall-dora.sh;0;4
 
 [VTE]
 last_dir=/home/tower69
